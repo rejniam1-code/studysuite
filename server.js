@@ -185,6 +185,19 @@ app.get('/api/activities', (req, res) => {
   });
 });
 
+// DELETE ACCOUNT ENDPOINT
+app.delete('/api/user/:email', (req, res) => {
+  const email = req.params.email;
+  db.serialize(() => {
+    db.run('DELETE FROM activities WHERE user_email = ?', [email]);
+    db.run('DELETE FROM subjects WHERE user_email = ?', [email]);
+    db.run('DELETE FROM users WHERE email = ?', [email], (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'Account and associated data deleted successfully.' });
+    });
+  });
+});
+
 app.post('/api/activities', (req, res) => {
   const { email, title, subject, due_date, due_time, priority, notes } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });

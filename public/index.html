@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Task Management System</title>
+  <title>Student Task Management System - StudySuite</title>
   <style>
     :root {
       --bg: #0b0f19;
@@ -298,7 +298,7 @@
   <div class="container">
     <div class="top-bar">
       <h2>🎓 StudySuite</h2>
-      <div>
+      <div style="display: flex; gap: 8px;">
         <button onclick="toggleTheme()" class="btn-secondary" style="width: auto; padding: 6px 12px; margin: 0;">🌓 Theme</button>
       </div>
     </div>
@@ -317,13 +317,13 @@
       
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" id="loginEmail" placeholder="student@example.com">
+        <input type="email" id="loginEmail" placeholder="student@example.com" autocomplete="off">
       </div>
       
       <div class="form-group">
         <label>Password</label>
         <div class="password-wrapper">
-          <input type="password" id="loginPassword" placeholder="••••••••">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="new-password">
           <span class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)">👁️</span>
         </div>
       </div>
@@ -345,7 +345,7 @@
 
       <div class="form-group">
         <label>Full Name</label>
-        <input type="text" id="regName" placeholder="e.g. Juan Dela Cruz">
+        <input type="text" id="regName" placeholder="e.g. Juan Dela Cruz" autocomplete="off">
       </div>
       
       <div class="form-group">
@@ -371,13 +371,13 @@
 
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" id="regEmail" placeholder="student@example.com">
+        <input type="email" id="regEmail" placeholder="student@example.com" autocomplete="off">
       </div>
       
       <div class="form-group">
         <label>Password (8 to 20 characters)</label>
         <div class="password-wrapper">
-          <input type="password" id="regPassword" placeholder="••••••••" minlength="8" maxlength="20">
+          <input type="password" id="regPassword" placeholder="••••••••" minlength="8" maxlength="20" autocomplete="new-password">
           <span class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">👁️</span>
         </div>
         <button type="button" onclick="suggestPassword()" class="btn-secondary" style="margin-top: 6px; font-size: 12px; padding: 6px;">💡 Suggest Strong Password</button>
@@ -391,7 +391,7 @@
       <h2>Reset Password</h2>
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" id="forgotEmail" placeholder="student@example.com">
+        <input type="email" id="forgotEmail" placeholder="student@example.com" autocomplete="off">
       </div>
       <button onclick="handleForgotReq()">Send OTP Code</button>
       <button onclick="showView('viewSignin')" class="btn-secondary">Back to Sign In</button>
@@ -402,12 +402,12 @@
       <h2>Set New Password</h2>
       <div class="form-group">
         <label>OTP Code</label>
-        <input type="text" id="otpCode" placeholder="Enter 6-digit code">
+        <input type="text" id="otpCode" placeholder="Enter 6-digit code" autocomplete="off">
       </div>
       <div class="form-group">
         <label>New Password (8-20 characters)</label>
         <div class="password-wrapper">
-          <input type="password" id="newPassword" placeholder="••••••••" minlength="8" maxlength="20">
+          <input type="password" id="newPassword" placeholder="••••••••" minlength="8" maxlength="20" autocomplete="new-password">
           <span class="toggle-password" onclick="togglePasswordVisibility('newPassword', this)">👁️</span>
         </div>
       </div>
@@ -421,7 +421,10 @@
           <h3 style="margin: 0;">Hello, <span id="userName" style="color: var(--accent);">Student</span>! 👋</h3>
           <small id="userCourseTag" style="color: var(--text-dim);"></small>
         </div>
-        <button onclick="confirmLogout()" class="btn-del">Logout</button>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="openProfileSettings()" class="btn-secondary" style="width: auto; padding: 6px 12px; margin: 0;">⚙️ Settings</button>
+          <button onclick="confirmLogout()" class="btn-del" style="margin: 0; width: auto; padding: 6px 12px;">Logout</button>
+        </div>
       </div>
 
       <!-- METRIC CARDS -->
@@ -450,10 +453,10 @@
           <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px;">
             <h4>📚 Subjects</h4>
             <div class="form-group">
-              <input type="text" id="subCode" placeholder="Subject Code (e.g., CS101)">
+              <input type="text" id="subCode" placeholder="Subject Code (e.g., CS101)" autocomplete="off">
             </div>
             <div class="form-group">
-              <input type="text" id="subName" placeholder="Subject Title">
+              <input type="text" id="subName" placeholder="Subject Title" autocomplete="off">
             </div>
             <button onclick="addSubject()">+ Add Subject</button>
             <div id="subjectList" style="max-height: 120px; overflow-y: auto; margin-top: 10px;"></div>
@@ -463,7 +466,7 @@
             <h4>➕ New Activity</h4>
             <div class="form-group">
               <label>Activity Title *</label>
-              <input type="text" id="actTitle" placeholder="e.g. Midterm Lab Exercise">
+              <input type="text" id="actTitle" placeholder="e.g. Midterm Lab Exercise" autocomplete="off">
             </div>
             <div class="form-group">
               <label>Subject</label>
@@ -503,6 +506,48 @@
           <h4>📅 Deadlines Calendar</h4>
           <div class="calendar-grid" id="calendarCells"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE SETTINGS MODAL -->
+  <div class="modal-overlay" id="profileModal" style="display: none;">
+    <div class="modal-box" style="text-align: left;">
+      <h3 style="color: var(--accent); margin-bottom: 15px; text-align: center;">⚙️ Account Settings</h3>
+      
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="settingsName" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Course / Major</label>
+        <select id="settingsCourse">
+          <option value="BSCS (Computer Science)">BSCS (Computer Science)</option>
+          <option value="BSHM (Hospitality Management)">BSHM (Hospitality Management)</option>
+          <option value="BEED (Elementary Education)">BEED (Elementary Education)</option>
+          <option value="BSED (Secondary Education)">BSED (Secondary Education)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Year Level</label>
+        <select id="settingsYear">
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+          <option value="4th Year">4th Year</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button onclick="saveProfileSettings()" style="margin: 0;">Save Changes</button>
+        <button onclick="closeProfileSettings()" class="btn-secondary" style="margin: 0;">Cancel</button>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+      
+      <div style="text-align: center;">
+        <p style="font-size: 12px; color: var(--danger); margin-bottom: 10px;">Danger Zone: Deleting your account will remove all your data permanently.</p>
+        <button onclick="confirmDeleteAccount()" class="btn-del" style="width: 100%;">🗑️ Delete My Account</button>
       </div>
     </div>
   </div>
@@ -681,6 +726,72 @@
       loadActivities();
     }
 
+    // PROFILE SETTINGS MODAL LOGIC
+    function openProfileSettings() {
+      if (!activeUser) return;
+      document.getElementById('settingsName').value = activeUser.fullname || '';
+      document.getElementById('settingsCourse').value = activeUser.course || 'BSCS (Computer Science)';
+      document.getElementById('settingsYear').value = activeUser.year || '1st Year';
+      document.getElementById('profileModal').style.display = 'flex';
+    }
+
+    function closeProfileSettings() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
+
+    async function saveProfileSettings() {
+      const fullname = document.getElementById('settingsName').value.trim();
+      const course = document.getElementById('settingsCourse').value;
+      const year = document.getElementById('settingsYear').value;
+
+      if (!fullname) {
+        showNotice("Validation Error", "Full Name cannot be empty.", "⚠️");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/user/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: activeUser.email, fullname, course, year, profileCompleted: 1 })
+        });
+        if (res.ok) {
+          activeUser.fullname = fullname;
+          activeUser.course = course;
+          activeUser.year = year;
+          launchDashboard();
+          closeProfileSettings();
+          showNotice("Success", "Profile details updated successfully!", "✅");
+        } else {
+          showNotice("Error", "Failed to update profile.", "❌");
+        }
+      } catch (err) {
+        showNotice("Server Error", "Unable to connect to server.", "❌");
+      }
+    }
+
+    function confirmDeleteAccount() {
+      showConfirm("Delete Account", "Are you sure you want to delete your account? All subjects and activities will be permanently erased.", async () => {
+        try {
+          const res = await fetch(`/api/user/${encodeURIComponent(activeUser.email)}`, {
+            method: 'DELETE'
+          });
+          if (res.ok) {
+            closeProfileSettings();
+            showNotice("Account Deleted", "Your account has been deleted permanently.", "🗑️", () => {
+              activeUser = null;
+              globalActivities = [];
+              showView('viewGreeting');
+            });
+          } else {
+            showNotice("Error", "Failed to delete account.", "❌");
+          }
+        } catch (e) {
+          showNotice("Server Error", "Unable to connect to server.", "❌");
+        }
+      });
+    }
+
     async function handleForgotReq() {
       const email = document.getElementById('forgotEmail').value.trim();
       if (!email) {
@@ -740,13 +851,16 @@
         activeUser = null;
         globalActivities = [];
         
-        // I-clear ang UI lists para hindi maiwan ang data ng naunang user
         const activityList = document.getElementById('activityList');
         const subjectList = document.getElementById('subjectList');
         const calendarCells = document.getElementById('calendarCells');
         if (activityList) activityList.innerHTML = '';
         if (subjectList) subjectList.innerHTML = '';
         if (calendarCells) calendarCells.innerHTML = '';
+
+        // Clear signin inputs
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
 
         showView('viewGreeting');
       });
@@ -960,7 +1074,7 @@
       });
     }
 
-    // FIXED CALENDAR FUNCTION WITH PADDED DATES
+    // CALENDAR FUNCTION WITH PADDED DATES
     function renderCalendar() {
       const calCells = document.getElementById('calendarCells');
       if (!calCells) return;
