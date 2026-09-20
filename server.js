@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -27,7 +27,14 @@ db.serialize(() => {
     course TEXT,
     year TEXT,
     profileCompleted BOOLEAN DEFAULT 0
-  )`);
+  )`, (err) => {
+    if (!err) {
+      // AUTO-FIX: Idadagdag ang course at year column kung wala pa sa lumang table
+      db.run(`ALTER TABLE users ADD COLUMN course TEXT`, () => {});
+      db.run(`ALTER TABLE users ADD COLUMN year TEXT`, () => {});
+      db.run(`ALTER TABLE users ADD COLUMN profileCompleted BOOLEAN DEFAULT 0`, () => {});
+    }
+  });
 
   // SUBJECTS TABLE
   db.run(`CREATE TABLE IF NOT EXISTS subjects (
@@ -46,11 +53,11 @@ db.serialize(() => {
     priority TEXT DEFAULT 'Medium',
     notes TEXT,
     status TEXT DEFAULT 'Pending'
-  )`);
-
-  // AUTO-FIX: Idadagdag ang due_time column kung wala pa ito sa lumang database
-  db.run(`ALTER TABLE activities ADD COLUMN due_time TEXT`, (err) => {
-    // Balewalain kung umiiral na ang column
+  )`, (err) => {
+    if (!err) {
+      // AUTO-FIX: Idadagdag ang due_time column kung wala pa ito sa lumang database
+      db.run(`ALTER TABLE activities ADD COLUMN due_time TEXT`, () => {});
+    }
   });
 });
 
