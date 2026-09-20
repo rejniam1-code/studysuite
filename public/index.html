@@ -43,7 +43,6 @@
       padding: 12px;
     }
 
-    /* RESPONSIVE CONTAINER FOR MOBILE, TABLET & PC */
     .container {
       width: 100%;
       max-width: 950px;
@@ -55,13 +54,8 @@
     }
 
     @media (max-width: 600px) {
-      body {
-        padding: 6px;
-      }
-      .container {
-        padding: 16px;
-        border-radius: 8px;
-      }
+      body { padding: 6px; }
+      .container { padding: 16px; border-radius: 8px; }
     }
 
     .top-bar {
@@ -75,7 +69,6 @@
 
     h1, h2, h3, h4 { margin-bottom: 12px; }
 
-    /* FORM STYLING FOR CLEARER UI */
     .form-group {
       margin-bottom: 14px;
       text-align: left;
@@ -108,6 +101,27 @@
     select option {
       background: var(--card-bg);
       color: var(--text);
+    }
+
+    /* PASSWORD WRAPPER FOR EYE TOGGLE */
+    .password-wrapper {
+      position: relative;
+    }
+    .password-wrapper input {
+      padding-right: 42px;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 16px;
+      user-select: none;
+      opacity: 0.7;
+    }
+    .toggle-password:hover {
+      opacity: 1;
     }
 
     button {
@@ -198,9 +212,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: 8px;
     }
 
-    /* RESPONSIVE LAYOUT GRID */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -208,9 +222,7 @@
     }
 
     @media (max-width: 768px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
+      .grid-2 { grid-template-columns: 1fr; }
     }
 
     .calendar-grid {
@@ -243,18 +255,16 @@
       bottom: 100%;
       left: 50%;
       transform: translateX(-50%);
-      background: #000;
-      color: #fff;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       padding: 6px;
       border-radius: 4px;
       font-size: 10px;
       white-space: nowrap;
       z-index: 10;
     }
-
     .cal-cell:hover .cal-tooltip { display: block; }
 
-    /* CUSTOM IN-APP VERIFICATION & NOTICE BOX */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -293,18 +303,17 @@
       </div>
     </div>
 
-    <!-- STEP 1: GREETING SCREEN -->
+    <!-- GREETING SCREEN -->
     <div id="viewGreeting" style="display: block; text-align: center; padding: 20px 0;">
       <h1 style="color: var(--accent); font-size: 28px;">Welcome to StudySuite</h1>
-      <p style="color: var(--text-dim); margin-bottom: 24px; font-size: 15px;">Organize your subjects, track academic deadlines, and manage tasks efficiently on any device.</p>
+      <p style="color: var(--text-dim); margin-bottom: 24px; font-size: 15px;">Organize your subjects, track academic deadlines, and manage tasks efficiently.</p>
       <button onclick="showView('viewSignin')" style="max-width: 280px;">Proceed to System →</button>
     </div>
 
-    <!-- STEP 2: SIGN IN SCREEN -->
+    <!-- SIGN IN SCREEN -->
     <div id="viewSignin" style="display: none; max-width: 450px; margin: 0 auto;">
       <button onclick="showView('viewGreeting')" class="btn-secondary" style="width: auto; padding: 4px 10px; font-size: 12px; margin-bottom: 15px;">← Back</button>
       <h2 style="text-align: center; color: var(--accent);">Sign In</h2>
-      <p style="text-align: center; font-size: 13px; color: var(--text-dim); margin-bottom: 20px;">Enter your account credentials to continue.</p>
       
       <div class="form-group">
         <label>Email Address</label>
@@ -313,7 +322,10 @@
       
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="••••••••">
+        <div class="password-wrapper">
+          <input type="password" id="loginPassword" placeholder="••••••••">
+          <span class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)">👁️</span>
+        </div>
       </div>
       
       <div style="text-align: right; font-size: 12px; margin-bottom: 15px;">
@@ -326,11 +338,10 @@
       </p>
     </div>
 
-    <!-- SIGN UP VIEW WITH CLEAR FORM & COURSE DROPDOWN -->
+    <!-- SIGN UP VIEW -->
     <div id="viewSignup" style="display: none; max-width: 480px; margin: 0 auto;">
       <button onclick="showView('viewSignin')" class="btn-secondary" style="width: auto; padding: 4px 10px; font-size: 12px; margin-bottom: 15px;">← Back to Sign In</button>
       <h2 style="color: var(--accent);">Create Account</h2>
-      <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 20px;">Fill out the details below to set up your account.</p>
 
       <div class="form-group">
         <label>Full Name</label>
@@ -365,81 +376,45 @@
       
       <div class="form-group">
         <label>Password (8 to 20 characters)</label>
-        <input type="password" id="regPassword" placeholder="••••••••" minlength="8" maxlength="20">
+        <div class="password-wrapper">
+          <input type="password" id="regPassword" placeholder="••••••••" minlength="8" maxlength="20">
+          <span class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">👁️</span>
+        </div>
         <button type="button" onclick="suggestPassword()" class="btn-secondary" style="margin-top: 6px; font-size: 12px; padding: 6px;">💡 Suggest Strong Password</button>
       </div>
       
       <button onclick="handleSignup()">Complete Registration</button>
-      <p style="font-size: 13px; text-align: center; margin-top: 15px;">
-        <a href="#" onclick="showView('viewSignin')" style="color: var(--text-dim); text-decoration: none;">Already have an account? Sign in</a>
-      </p>
     </div>
 
     <!-- FORGOT PASSWORD - REQUEST OTP -->
     <div id="viewForgotReq" style="display: none; max-width: 450px; margin: 0 auto;">
       <h2>Reset Password</h2>
-      <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;">Enter your registered email address to get an OTP code.</p>
-      
       <div class="form-group">
         <label>Email Address</label>
         <input type="email" id="forgotEmail" placeholder="student@example.com">
       </div>
-      
       <button onclick="handleForgotReq()">Send OTP Code</button>
       <button onclick="showView('viewSignin')" class="btn-secondary">Back to Sign In</button>
     </div>
 
-    <!-- FORGOT PASSWORD - VERIFY OTP & RESET -->
+    <!-- FORGOT PASSWORD - RESET WITH OTP -->
     <div id="viewForgotReset" style="display: none; max-width: 450px; margin: 0 auto;">
       <h2>Set New Password</h2>
-      
       <div class="form-group">
         <label>OTP Code</label>
         <input type="text" id="otpCode" placeholder="Enter 6-digit code">
       </div>
-
       <div class="form-group">
         <label>New Password (8-20 characters)</label>
-        <input type="password" id="newPassword" placeholder="••••••••" minlength="8" maxlength="20">
+        <div class="password-wrapper">
+          <input type="password" id="newPassword" placeholder="••••••••" minlength="8" maxlength="20">
+          <span class="toggle-password" onclick="togglePasswordVisibility('newPassword', this)">👁️</span>
+        </div>
       </div>
-
       <button onclick="handleForgotReset()">Update Password</button>
     </div>
 
-    <!-- STEP 3: USER PROFILE SETUP SCREEN (Appears ONLY if profile isn't completed) -->
-    <div id="viewUserInfo" style="display: none; max-width: 480px; margin: 0 auto;">
-      <h2 style="color: var(--accent);">Student Profile Setup</h2>
-      <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 20px;">Please confirm your details before proceeding to the dashboard.</p>
-      
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="infoName" placeholder="Juan Dela Cruz">
-      </div>
-      
-      <div class="form-group">
-        <label>Course / Major</label>
-        <select id="infoCourse">
-          <option value="BSCS (Computer Science)">BSCS (Computer Science)</option>
-          <option value="BSHM (Hospitality Management)">BSHM (Hospitality Management)</option>
-          <option value="BEED (Elementary Education)">BEED (Elementary Education)</option>
-          <option value="BSED (Secondary Education)">BSED (Secondary Education)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Year Level</label>
-        <select id="infoYear">
-          <option value="1st Year">1st Year</option>
-          <option value="2nd Year">2nd Year</option>
-          <option value="3rd Year">3rd Year</option>
-          <option value="4th Year">4th Year</option>
-        </select>
-      </div>
-      
-      <button onclick="saveUserInfo()">Save Profile & Open Dashboard →</button>
-    </div>
-
-    <!-- STEP 4: MAIN SYSTEM DASHBOARD -->
+    <!-- MAIN SYSTEM DASHBOARD -->
     <div id="main-system" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
         <div>
@@ -470,9 +445,8 @@
       </div>
 
       <div class="grid-2">
-        <!-- LEFT COLUMN: CONTROLS & FORMS -->
+        <!-- LEFT COLUMN -->
         <div>
-          <!-- ADD SUBJECT -->
           <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px;">
             <h4>📚 Subjects</h4>
             <div class="form-group">
@@ -485,19 +459,16 @@
             <div id="subjectList" style="max-height: 120px; overflow-y: auto; margin-top: 10px;"></div>
           </div>
 
-          <!-- ADD ACTIVITY -->
           <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
             <h4>➕ New Activity</h4>
             <div class="form-group">
               <label>Activity Title *</label>
               <input type="text" id="actTitle" placeholder="e.g. Midterm Lab Exercise">
             </div>
-
             <div class="form-group">
               <label>Subject</label>
               <select id="actSubject"><option value="General">General</option></select>
             </div>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <div class="form-group">
                 <label>Priority</label>
@@ -512,22 +483,19 @@
                 <input type="date" id="actDate">
               </div>
             </div>
-
             <div class="form-group">
               <label>Time</label>
               <input type="time" id="actTime">
             </div>
-
             <div class="form-group">
               <label>Additional Notes</label>
               <textarea id="actNotes" placeholder="Details or instructions..." rows="2"></textarea>
             </div>
-
             <button onclick="addActivity()">Save Activity</button>
           </div>
         </div>
 
-        <!-- RIGHT COLUMN: LIST & CALENDAR -->
+        <!-- RIGHT COLUMN -->
         <div>
           <h4 id="listHeader">📌 Activity List (ALL)</h4>
           <div id="activityList" style="max-height: 320px; overflow-y: auto; margin-bottom: 20px;"></div>
@@ -539,13 +507,12 @@
     </div>
   </div>
 
-  <!-- IN-APP VERIFICATION & NOTICE BOX (CUSTOM MODAL) -->
+  <!-- MODAL -->
   <div class="modal-overlay" id="customModal">
     <div class="modal-box">
       <div class="modal-icon" id="modalIcon">ℹ️</div>
       <h3 id="modalTitle" style="margin-bottom: 8px;">Notice</h3>
       <p id="modalMessage" style="font-size: 14px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.4;"></p>
-      
       <div id="modalActions" style="display: flex; gap: 10px; justify-content: center;">
         <button id="modalPrimaryBtn" style="margin: 0;">OK</button>
         <button id="modalCancelBtn" class="btn-secondary" style="display: none; margin: 0;">Cancel</button>
@@ -555,15 +522,26 @@
 
   <script>
     let currentFilter = 'ALL';
-    let globalActivities = [];
     let activeUser = null;
     let targetEmailForOtp = '';
+    let globalActivities = [];
 
     window.addEventListener('DOMContentLoaded', () => {
       showView('viewGreeting');
     });
 
-    // IN-APP VERIFICATION BOX / MODAL SYSTEM
+    // PASSWORD EYE TOGGLE FUNCTION
+    function togglePasswordVisibility(inputId, iconEl) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        iconEl.textContent = '🔒';
+      } else {
+        input.type = 'password';
+        iconEl.textContent = '👁️';
+      }
+    }
+
     function showNotice(title, message, icon = "ℹ️", onOk = null) {
       document.getElementById('modalIcon').innerText = icon;
       document.getElementById('modalTitle').innerText = title;
@@ -599,7 +577,6 @@
         closeCustomModal();
         onConfirm();
       };
-      
       cancelBtn.onclick = closeCustomModal;
 
       document.getElementById('customModal').style.display = 'flex';
@@ -609,19 +586,8 @@
       document.getElementById('customModal').style.display = 'none';
     }
 
-    // CLEAR FORM INPUTS
-    function clearAuthFormInputs() {
-      const ids = ['loginEmail', 'loginPassword', 'regName', 'regEmail', 'regPassword', 'forgotEmail', 'otpCode', 'newPassword'];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-    }
-
-    // VIEW SWITCHER
     function showView(viewId) {
-      clearAuthFormInputs();
-      const views = ['viewGreeting', 'viewSignin', 'viewSignup', 'viewForgotReq', 'viewForgotReset', 'viewUserInfo', 'main-system'];
+      const views = ['viewGreeting', 'viewSignin', 'viewSignup', 'viewForgotReq', 'viewForgotReset', 'main-system'];
       views.forEach(v => {
         const el = document.getElementById(v);
         if (el) el.style.display = (v === viewId) ? 'block' : 'none';
@@ -632,24 +598,18 @@
       document.body.classList.toggle('light-mode');
     }
 
-    // SUGGEST STRONG PASSWORD (8 to 20 chars)
     function suggestPassword() {
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-      const length = 12;
       let suggested = "";
-      
-      for (let i = 0; i < length; i++) {
+      for (let i = 0; i < 12; i++) {
         suggested += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-
       const passInput = document.getElementById('regPassword');
       passInput.type = "text";
       passInput.value = suggested;
-      
       showNotice("Strong Password Generated", `Your suggested password is:\n\n${suggested}\n\nIt has been automatically set in the password field.`, "💡");
     }
 
-    // AUTH - SIGNUP WITH VALIDATION & DUPLICATE CHECK
     async function handleSignup() {
       const fullname = document.getElementById('regName').value.trim();
       const course = document.getElementById('regCourse').value;
@@ -671,9 +631,8 @@
         const res = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fullname, course, year, email, password, profileCompleted: true })
+          body: JSON.stringify({ fullname, course, year, email, password })
         });
-
         const data = await res.json();
         if (res.ok) {
           showNotice("Account Created", "Your account has been successfully created! You can now sign in.", "✅", () => {
@@ -687,7 +646,6 @@
       }
     }
 
-    // AUTH - SIGNIN WITH AUTO DASHBOARD ROUTING
     async function handleSignin() {
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value.trim();
@@ -703,18 +661,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-
         const data = await res.json();
         if (res.ok) {
           activeUser = data.user;
-          
-          if (activeUser.profileCompleted) {
-            launchDashboard();
-          } else {
-            document.getElementById('infoName').value = activeUser.fullname || '';
-            if (activeUser.course) document.getElementById('infoCourse').value = activeUser.course;
-            showView('viewUserInfo');
-          }
+          launchDashboard();
         } else {
           showNotice("Sign In Failed", data.error || "Invalid login credentials.", "❌");
         }
@@ -723,65 +673,30 @@
       }
     }
 
-    // SAVE PROFILE SETUP
-    async function saveUserInfo() {
-      const name = document.getElementById('infoName').value.trim();
-      const course = document.getElementById('infoCourse').value;
-      const year = document.getElementById('infoYear').value;
-
-      if (!name || !course) {
-        showNotice("Validation Error", "Please provide your name and course.", "⚠️");
-        return;
-      }
-
-      if (activeUser) {
-        activeUser.fullname = name;
-        activeUser.course = course;
-        activeUser.year = year;
-        activeUser.profileCompleted = true;
-
-        try {
-          await fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: activeUser.email, fullname: name, course, year, profileCompleted: true })
-          });
-        } catch (e) {
-          console.error("Profile update error", e);
-        }
-      }
-
-      launchDashboard();
-    }
-
     function launchDashboard() {
       document.getElementById('userName').innerText = activeUser ? activeUser.fullname : 'Student';
       document.getElementById('userCourseTag').innerText = activeUser ? `${activeUser.course || ''} (${activeUser.year || ''})` : '';
-      
       showView('main-system');
       loadSubjects();
       loadActivities();
     }
 
-    // AUTH - FORGOT PASSWORD & OTP
     async function handleForgotReq() {
       const email = document.getElementById('forgotEmail').value.trim();
       if (!email) {
         showNotice("Input Required", "Please enter your registered email address.", "⚠️");
         return;
       }
-
       try {
         const res = await fetch('/api/auth/forgot-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
         });
-
         const data = await res.json();
         if (res.ok) {
           targetEmailForOtp = email;
-          showNotice("OTP Sent", "An OTP verification code has been sent. Please check your console/terminal.", "📩", () => {
+          showNotice("OTP Sent", "An OTP verification code has been sent. Please check your server terminal console.", "📩", () => {
             showView('viewForgotReset');
           });
         } else {
@@ -801,21 +716,15 @@
         return;
       }
 
-      if (newPassword.length < 8 || newPassword.length > 20) {
-        showNotice("Password Error", "New password must be between 8 and 20 characters long.", "⚠️");
-        return;
-      }
-
       try {
         const res = await fetch('/api/auth/reset-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: targetEmailForOtp, otp, newPassword })
         });
-
         const data = await res.json();
         if (res.ok) {
-          showNotice("Password Reset Success", "Your password has been updated! You can now sign in with your new password.", "✅", () => {
+          showNotice("Password Reset Success", "Your password has been updated! You can now sign in.", "✅", () => {
             showView('viewSignin');
           });
         } else {
@@ -826,15 +735,23 @@
       }
     }
 
-    // LOGOUT ACTION
     function confirmLogout() {
       showConfirm("Logout", "Are you sure you want to log out of StudySuite?", () => {
         activeUser = null;
+        globalActivities = [];
+        
+        // I-clear ang UI lists para hindi maiwan ang data ng naunang user
+        const activityList = document.getElementById('activityList');
+        const subjectList = document.getElementById('subjectList');
+        const calendarCells = document.getElementById('calendarCells');
+        if (activityList) activityList.innerHTML = '';
+        if (subjectList) subjectList.innerHTML = '';
+        if (calendarCells) calendarCells.innerHTML = '';
+
         showView('viewGreeting');
       });
     }
 
-    // DASHBOARD FUNCTIONS
     function setFilter(filterType) {
       currentFilter = filterType;
       document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
@@ -842,13 +759,14 @@
       if (filterType === 'Pending') document.getElementById('cardPending')?.classList.add('active-filter');
       if (filterType === 'In Progress') document.getElementById('cardProgress')?.classList.add('active-filter');
       if (filterType === 'Completed') document.getElementById('cardCompleted')?.classList.add('active-filter');
-
       renderActivityList();
     }
 
+    // SUBJECTS (ISOLATED PER USER)
     async function loadSubjects() {
+      if (!activeUser) return;
       try {
-        const res = await fetch('/api/subjects');
+        const res = await fetch(`/api/subjects?email=${encodeURIComponent(activeUser.email)}`);
         const subjects = await res.json();
         
         const select = document.getElementById('actSubject');
@@ -865,7 +783,6 @@
             option.textContent = `${sub.code}: ${sub.name}`;
             select.appendChild(option);
           }
-
           if (container) {
             container.innerHTML += `
               <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:8px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px;">
@@ -875,7 +792,6 @@
             `;
           }
         });
-
         if (select && currentValue) select.value = currentValue;
       } catch (err) {
         console.error("Error loading subjects:", err);
@@ -896,7 +812,7 @@
       const res = await fetch('/api/subjects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, name })
+        body: JSON.stringify({ email: activeUser.email, code, name })
       });
 
       if (res.ok) {
@@ -913,49 +829,11 @@
       });
     }
 
-    // FIXED ADD ACTIVITY FUNCTION
-    async function addActivity() {
-      const titleInput = document.getElementById('actTitle');
-      const title = titleInput.value.trim();
-      const subject = document.getElementById('actSubject').value;
-      const priority = document.getElementById('actPriority').value;
-      const due_date = document.getElementById('actDate').value;
-      const due_time = document.getElementById('actTime').value;
-      const notes = document.getElementById('actNotes').value.trim();
-
-      if (!title) {
-        showNotice("Input Required", "Please enter an Activity Title.", "⚠️");
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/activities', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, subject, due_date, due_time, priority, notes })
-        });
-
-        if (res.ok) {
-          titleInput.value = '';
-          document.getElementById('actNotes').value = '';
-          document.getElementById('actTime').value = '';
-          document.getElementById('actDate').value = '';
-          
-          showNotice("Success", "Activity saved successfully!", "✅");
-          await loadActivities();
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          showNotice("Save Failed", errData.error || "Could not save activity.", "❌");
-        }
-      } catch (err) {
-        showNotice("Server Error", "Unable to connect to the backend server.", "❌");
-      }
-    }
-
-    // FIXED LOAD ACTIVITIES FUNCTION
+    // LOAD ACTIVITIES (ISOLATED PER USER)
     async function loadActivities() {
+      if (!activeUser) return;
       try {
-        const res = await fetch('/api/activities');
+        const res = await fetch(`/api/activities?email=${encodeURIComponent(activeUser.email)}`);
         if (!res.ok) throw new Error("Failed to load");
         
         globalActivities = await res.json();
@@ -984,6 +862,54 @@
       }
     }
 
+    async function addActivity() {
+      const titleInput = document.getElementById('actTitle');
+      const title = titleInput.value.trim();
+      const subject = document.getElementById('actSubject').value;
+      const priority = document.getElementById('actPriority').value;
+      const due_date = document.getElementById('actDate').value;
+      const due_time = document.getElementById('actTime').value;
+      const notes = document.getElementById('actNotes').value.trim();
+
+      if (!title) {
+        showNotice("Input Required", "Please enter an Activity Title.", "⚠️");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/activities', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: activeUser.email, title, subject, due_date, due_time, priority, notes })
+        });
+        if (res.ok) {
+          titleInput.value = '';
+          document.getElementById('actNotes').value = '';
+          document.getElementById('actDate').value = '';
+          document.getElementById('actTime').value = '';
+          await loadActivities();
+        }
+      } catch (err) {
+        showNotice("Error", "Failed to save activity.", "❌");
+      }
+    }
+
+    async function updateStatus(id, status) {
+      await fetch(`/api/activities/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      await loadActivities();
+    }
+
+    function confirmDeleteActivity(id) {
+      showConfirm("Delete Activity", "Are you sure you want to delete this activity?", async () => {
+        await fetch(`/api/activities/${id}`, { method: 'DELETE' });
+        await loadActivities();
+      });
+    }
+
     function renderActivityList() {
       const container = document.getElementById('activityList');
       if (!container) return;
@@ -992,7 +918,7 @@
       const listHeader = document.getElementById('listHeader');
       if (listHeader) listHeader.innerText = `📌 Activity List (${currentFilter})`;
 
-      container.innerHTML = filtered.length === 0 ? '<p style="font-size:12px; color:var(--text-dim); margin-top:10px;">No activities found for this filter.</p>' : '';
+      container.innerHTML = filtered.length === 0 ? '<p style="font-size:12px; color:var(--text-dim); margin-top:10px; text-align:center; padding:20px;">No activities found for this filter.</p>' : '';
 
       filtered.forEach(act => {
         let formattedTime = '';
@@ -1031,22 +957,6 @@
             </div>
           </div>
         `;
-      });
-    }
-
-    async function updateStatus(id, status) {
-      await fetch(`/api/activities/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      await loadActivities();
-    }
-
-    function confirmDeleteActivity(id) {
-      showConfirm("Delete Activity", "Are you sure you want to delete this activity?", async () => {
-        await fetch(`/api/activities/${id}`, { method: 'DELETE' });
-        await loadActivities();
       });
     }
 

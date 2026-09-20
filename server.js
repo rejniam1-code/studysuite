@@ -12,9 +12,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const otpStore = {}; 
 
-const db = new sqlite3.Database('./school_system.db', (err) => {
+const db = new sqlite3.Database('./school_v2.db', (err) => {
   if (err) console.error('Database Error:', err.message);
-  else console.log('Connected to school_system.db');
+  else console.log('Connected to school_v2.db');
 });
 
 db.serialize(() => {
@@ -29,23 +29,28 @@ db.serialize(() => {
     profileCompleted BOOLEAN DEFAULT 0
   )`, (err) => {
     if (!err) {
-      // AUTO-FIX: Idadagdag ang course at year column kung wala pa sa lumang table
       db.run(`ALTER TABLE users ADD COLUMN course TEXT`, () => {});
       db.run(`ALTER TABLE users ADD COLUMN year TEXT`, () => {});
       db.run(`ALTER TABLE users ADD COLUMN profileCompleted BOOLEAN DEFAULT 0`, () => {});
     }
   });
 
-  // SUBJECTS TABLE
+  // SUBJECTS TABLE (May user_email para hiwalay bawat account)
   db.run(`CREATE TABLE IF NOT EXISTS subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL
-  )`);
+  )`, (err) => {
+    if (!err) {
+      db.run(`ALTER TABLE subjects ADD COLUMN user_email TEXT`, () => {});
+    }
+  });
 
-  // ACTIVITIES TABLE
+  // ACTIVITIES TABLE (May user_email para hiwalay bawat account)
   db.run(`CREATE TABLE IF NOT EXISTS activities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_email TEXT NOT NULL,
     title TEXT NOT NULL,
     subject TEXT DEFAULT 'General',
     due_date TEXT,
@@ -55,7 +60,7 @@ db.serialize(() => {
     status TEXT DEFAULT 'Pending'
   )`, (err) => {
     if (!err) {
-      // AUTO-FIX: Idadagdag ang due_time column kung wala pa ito sa lumang database
+      db.run(`ALTER TABLE activities ADD COLUMN user_email TEXT`, () => {});
       db.run(`ALTER TABLE activities ADD COLUMN due_time TEXT`, () => {});
     }
   });
@@ -141,17 +146,22 @@ app.post('/api/auth/reset-password', (req, res) => {
   });
 });
 
-// --- SUBJECT ENDPOINTS ---
+// --- SUBJECT ENDPOINTS (ISOLATED) ---
 app.get('/api/subjects', (req, res) => {
-  db.all('SELECT * FROM subjects ORDER BY id DESC', [], (err, rows) => {
+  const userEmail = req.query.email;
+  if (!userEmail) return res.json([]); // Walang ibabalik kung walang email
+
+  db.all('SELECT * FROM subjects WHERE user_email = ? ORDER BY id DESC', [userEmail], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows || []);
   });
 });
 
 app.post('/api/subjects', (req, res) => {
-  const { code, name } = req.body;
-  db.run('INSERT INTO subjects (code, name) VALUES (?, ?)', [code, name], function (err) {
+  const { email, code, name } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required.' });
+
+  db.run('INSERT INTO subjects (user_email, code, name) VALUES (?, ?, ?)', [email, code, name], function (err) {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ id: this.lastID, code, name });
   });
@@ -164,19 +174,24 @@ app.delete('/api/subjects/:id', (req, res) => {
   });
 });
 
-// --- ACTIVITY ENDPOINTS ---
+// --- ACTIVITY ENDPOINTS (ISOLATED) ---
 app.get('/api/activities', (req, res) => {
-  db.all('SELECT * FROM activities ORDER BY id DESC', [], (err, rows) => {
+  const userEmail = req.query.email;
+  if (!userEmail) return res.json([]); // Walang ibabalik kung walang email
+
+  db.all('SELECT * FROM activities WHERE user_email = ? ORDER BY id DESC', [userEmail], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows || []);
   });
 });
 
 app.post('/api/activities', (req, res) => {
-  const { title, subject, due_date, due_time, priority, notes } = req.body;
+  const { email, title, subject, due_date, due_time, priority, notes } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required.' });
+
   db.run(
-    'INSERT INTO activities (title, subject, due_date, due_time, priority, notes) VALUES (?, ?, ?, ?, ?, ?)',
-    [title, subject, due_date, due_time, priority, notes],
+    'INSERT INTO activities (user_email, title, subject, due_date, due_time, priority, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [email, title, subject, due_date, due_time, priority, notes],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ id: this.lastID, title, status: 'Pending' });
