@@ -575,6 +575,19 @@
       showView('viewGreeting');
     });
 
+    // CLEAR ALL INPUT FORMS FUNCTION
+    function clearAllForms() {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        if (input.type !== 'checkbox' && input.type !== 'radio') {
+          input.value = '';
+        }
+      });
+      document.querySelectorAll('.password-wrapper input').forEach(input => {
+        input.type = 'password';
+      });
+    }
+
     // PASSWORD EYE TOGGLE FUNCTION
     function togglePasswordVisibility(inputId, iconEl) {
       const input = document.getElementById(inputId);
@@ -632,6 +645,8 @@
     }
 
     function showView(viewId) {
+      clearAllForms(); // Automatic na maglilinis ng inputs tuwing mag-switch ng view
+      
       const views = ['viewGreeting', 'viewSignin', 'viewSignup', 'viewForgotReq', 'viewForgotReset', 'main-system'];
       views.forEach(v => {
         const el = document.getElementById(v);
@@ -857,10 +872,6 @@
         if (activityList) activityList.innerHTML = '';
         if (subjectList) subjectList.innerHTML = '';
         if (calendarCells) calendarCells.innerHTML = '';
-
-        // Clear signin inputs
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPassword').value = '';
 
         showView('viewGreeting');
       });

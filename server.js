@@ -198,6 +198,20 @@ app.delete('/api/user/:email', (req, res) => {
   });
 });
 
+// FUNCTION PARA LINISIN ANG LAHAT NG FORMS AT INPUTS
+    function clearAllForms() {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        if (input.type !== 'checkbox' && input.type !== 'radio') {
+          input.value = '';
+        }
+      });
+      // I-reset din ang password visibility sa nakatago kung sakaling nakabukas
+      document.querySelectorAll('.password-wrapper input').forEach(input => {
+        input.type = 'password';
+      });
+    }
+    
 app.post('/api/activities', (req, res) => {
   const { email, title, subject, due_date, due_time, priority, notes } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });
