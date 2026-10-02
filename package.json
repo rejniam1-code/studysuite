@@ -19,7 +19,16 @@
     "express": "^5.2.1",
     "google-auth-library": "^11.0.2",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.10",
     "sqlite3": "^6.0.1",
     "twilio": "^6.1.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rejniam1-code/studysuite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rejniam1-code/studysuite/issues"
+  },
+  "homepage": "https://github.com/rejniam1-code/studysuite#readme"
 }

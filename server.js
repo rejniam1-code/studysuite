@@ -6,239 +6,211 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public'))); // O ilagay sa parehong folder ang HTML file
 
-const otpStore = {}; 
-
-const db = new sqlite3.Database('./school_v2.db', (err) => {
-  if (err) console.error('Database Error:', err.message);
-  else console.log('Connected to school_v2.db');
+// 1. Database Setup (SQLite)
+const db = new sqlite3.Database('./studysuite.db', (err) => {
+  if (err) {
+    console.error('Database opening error: ', err.message);
+  } else {
+    console.log('Connected to SQLite database successfully.');
+  }
 });
 
+// Create Tables kung wala pa
 db.serialize(() => {
-  // USERS TABLE
+  // Users Table (Kasama ang role column para sa Student / Professor)
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    course TEXT,
-    year TEXT,
-    profileCompleted BOOLEAN DEFAULT 0
-  )`, (err) => {
-    if (!err) {
-      db.run(`ALTER TABLE users ADD COLUMN course TEXT`, () => {});
-      db.run(`ALTER TABLE users ADD COLUMN year TEXT`, () => {});
-      db.run(`ALTER TABLE users ADD COLUMN profileCompleted BOOLEAN DEFAULT 0`, () => {});
-    }
-  });
+    name TEXT,
+    email TEXT UNIQUE,
+    password TEXT,
+    role TEXT
+  )`);
 
-  // SUBJECTS TABLE (May user_email para hiwalay bawat account)
+  // Subjects Table
   db.run(`CREATE TABLE IF NOT EXISTS subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL
-  )`, (err) => {
-    if (!err) {
-      db.run(`ALTER TABLE subjects ADD COLUMN user_email TEXT`, () => {});
-    }
-  });
+    email TEXT,
+    code TEXT,
+    name TEXT
+  )`);
 
-  // ACTIVITIES TABLE (May user_email para hiwalay bawat account)
+  // Activities Table
   db.run(`CREATE TABLE IF NOT EXISTS activities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_email TEXT NOT NULL,
-    title TEXT NOT NULL,
-    subject TEXT DEFAULT 'General',
+    email TEXT,
+    title TEXT,
+    subject TEXT,
     due_date TEXT,
     due_time TEXT,
-    priority TEXT DEFAULT 'Medium',
+    priority TEXT,
     notes TEXT,
     status TEXT DEFAULT 'Pending'
-  )`, (err) => {
-    if (!err) {
-      db.run(`ALTER TABLE activities ADD COLUMN user_email TEXT`, () => {});
-      db.run(`ALTER TABLE activities ADD COLUMN due_time TEXT`, () => {});
-    }
-  });
+  )`);
 });
 
-// --- AUTH ENDPOINTS ---
-app.post('/api/auth/signup', (req, res) => {
-  const { fullname, course, year, email, password } = req.body;
-  if (!fullname || !email || !password) {
-    return res.status(400).json({ error: 'All fields are required.' });
-  }
 
-  db.run(
-    'INSERT INTO users (fullname, course, year, email, password, profileCompleted) VALUES (?, ?, ?, ?, ?, 1)',
-    [fullname, course, year, email, password],
-    function (err) {
-      if (err) {
-        if (err.message.includes('UNIQUE constraint failed')) {
-          return res.status(400).json({ error: 'Email already registered.' });
-        }
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ message: 'User created successfully!' });
-    }
-  );
-});
+// ==========================================
+// 2. AUTHENTICATION API ENDPOINTS
+// ==========================================
 
-app.post('/api/auth/signin', (req, res) => {
-  const { email, password } = req.body;
-  db.get(
-    'SELECT * FROM users WHERE email = ? AND password = ?',
-    [email, password],
-    (err, user) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
-      res.json({ message: 'Login successful', user });
-    }
-  );
-});
-
-app.put('/api/user/profile', (req, res) => {
-  const { email, fullname, course, year, profileCompleted } = req.body;
-  db.run(
-    'UPDATE users SET fullname = ?, course = ?, year = ?, profileCompleted = ? WHERE email = ?',
-    [fullname, course, year, profileCompleted ? 1 : 0, email],
-    (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'Profile updated' });
-    }
-  );
-});
-
-// FORGOT PASSWORD - REQUEST OTP
-app.post('/api/auth/forgot-password', (req, res) => {
-  const { email } = req.body;
-  db.get('SELECT email FROM users WHERE email = ?', [email], (err, user) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!user) return res.status(404).json({ error: 'Email not found.' });
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = otp;
-
-    console.log(`\n===================================`);
-    console.log(`🔑 OTP Code for ${email}: [ ${otp} ]`);
-    console.log(`===================================\n`);
-
-    res.json({ message: 'OTP generated! Check terminal console.' });
-  });
-});
-
-// FORGOT PASSWORD - RESET WITH OTP
-app.post('/api/auth/reset-password', (req, res) => {
-  const { email, otp, newPassword } = req.body;
+// Sign Up (May kasamang Role: Student / Professor)
+app.post('/api/signup', (req, res) => {
+  const { name, email, password, role } = req.body;
   
-  if (!otpStore[email] || otpStore[email] !== otp) {
-    return res.status(400).json({ error: 'Invalid or expired OTP code.' });
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
   }
 
-  db.run('UPDATE users SET password = ? WHERE email = ?', [newPassword, email], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    delete otpStore[email];
-    res.json({ message: 'Password updated successfully!' });
+  const userRole = role || 'Student'; // Default sa Student kung sakali
+  const query = `INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)`;
+
+  db.run(query, [name, email, password, userRole], function(err) {
+    if (err) {
+      return res.status(400).json({ message: 'Email is already registered or invalid data.' });
+    }
+    res.json({ id: this.lastID, message: 'Account created successfully!' });
   });
 });
 
-// --- SUBJECT ENDPOINTS (ISOLATED) ---
-app.get('/api/subjects', (req, res) => {
-  const userEmail = req.query.email;
-  if (!userEmail) return res.json([]); // Walang ibabalik kung walang email
+// Sign In / Login
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body;
 
-  db.all('SELECT * FROM subjects WHERE user_email = ? ORDER BY id DESC', [userEmail], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows || []);
-  });
-});
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
+  }
 
-app.post('/api/subjects', (req, res) => {
-  const { email, code, name } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email is required.' });
-
-  db.run('INSERT INTO subjects (user_email, code, name) VALUES (?, ?, ?)', [email, code, name], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: this.lastID, code, name });
-  });
-});
-
-app.delete('/api/subjects/:id', (req, res) => {
-  db.run('DELETE FROM subjects WHERE id = ?', req.params.id, (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Deleted' });
-  });
-});
-
-// --- ACTIVITY ENDPOINTS (ISOLATED) ---
-app.get('/api/activities', (req, res) => {
-  const userEmail = req.query.email;
-  if (!userEmail) return res.json([]); // Walang ibabalik kung walang email
-
-  db.all('SELECT * FROM activities WHERE user_email = ? ORDER BY id DESC', [userEmail], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows || []);
-  });
-});
-
-// DELETE ACCOUNT ENDPOINT
-app.delete('/api/user/:email', (req, res) => {
-  const email = req.params.email;
-  db.serialize(() => {
-    db.run('DELETE FROM activities WHERE user_email = ?', [email]);
-    db.run('DELETE FROM subjects WHERE user_email = ?', [email]);
-    db.run('DELETE FROM users WHERE email = ?', [email], (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'Account and associated data deleted successfully.' });
+  const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
+  db.get(query, [email, password], (err, row) => {
+    if (err || !row) {
+      return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+    // Ibalik ang user info kasama ang role
+    res.json({ 
+      email: row.email, 
+      name: row.name, 
+      role: row.role 
     });
   });
 });
 
-// FUNCTION PARA LINISIN ANG LAHAT NG FORMS AT INPUTS
-    function clearAllForms() {
-      const inputs = document.querySelectorAll('input');
-      inputs.forEach(input => {
-        if (input.type !== 'checkbox' && input.type !== 'radio') {
-          input.value = '';
-        }
-      });
-      // I-reset din ang password visibility sa nakatago kung sakaling nakabukas
-      document.querySelectorAll('.password-wrapper input').forEach(input => {
-        input.type = 'password';
-      });
+
+// ==========================================
+// 3. SUBJECTS API ENDPOINTS
+// ==========================================
+
+// Get Subjects per User
+app.get('/api/subjects', (req, res) => {
+  const { email } = req.query;
+  const query = `SELECT * FROM subjects WHERE email = ?`;
+
+  db.all(query, [email], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to retrieve subjects.' });
     }
-    
+    res.json(rows);
+  });
+});
+
+// Add Subject
+app.post('/api/subjects', (req, res) => {
+  const { email, code, name } = req.body;
+
+  if (!email || !code || !name) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  const query = `INSERT INTO subjects (email, code, name) VALUES (?, ?, ?)`;
+  db.run(query, [email, code, name], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to save subject.' });
+    }
+    res.json({ id: this.lastID, message: 'Subject added successfully!' });
+  });
+});
+
+// Delete Subject
+app.delete('/api/subjects/:id', (req, res) => {
+  const { id } = req.params;
+  const query = `DELETE FROM subjects WHERE id = ?`;
+
+  db.run(query, [id], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to delete subject.' });
+    }
+    res.json({ message: 'Subject deleted successfully!' });
+  });
+});
+
+
+// ==========================================
+// 4. ACTIVITIES API ENDPOINTS
+// ==========================================
+
+// Get Activities per User
+app.get('/api/activities', (req, res) => {
+  const { email } = req.query;
+  const query = `SELECT * FROM activities WHERE email = ?`;
+
+  db.all(query, [email], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to retrieve activities.' });
+    }
+    res.json(rows);
+  });
+});
+
+// Add Activity
 app.post('/api/activities', (req, res) => {
   const { email, title, subject, due_date, due_time, priority, notes } = req.body;
-  if (!email) return res.status(400).json({ error: 'Email is required.' });
 
-  db.run(
-    'INSERT INTO activities (user_email, title, subject, due_date, due_time, priority, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [email, title, subject, due_date, due_time, priority, notes],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, title, status: 'Pending' });
+  if (!email || !title) {
+    return res.status(400).json({ message: 'Email and title are required.' });
+  }
+
+  const query = `INSERT INTO activities (email, title, subject, due_date, due_time, priority, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')`;
+  db.run(query, [email, title, subject, due_date, due_time, priority, notes], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to save activity.' });
     }
-  );
+    res.json({ id: this.lastID, message: 'Activity added successfully!' });
+  });
 });
 
+// Update Activity Status (Pending / In Progress / Completed)
 app.patch('/api/activities/:id/status', (req, res) => {
+  const { id } = req.params;
   const { status } = req.body;
-  db.run('UPDATE activities SET status = ? WHERE id = ?', [status, req.params.id], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Updated' });
+
+  const query = `UPDATE activities SET status = ? WHERE id = ?`;
+  db.run(query, [status, id], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to update status.' });
+    }
+    res.json({ message: 'Status updated successfully!' });
   });
 });
 
+// Delete Activity
 app.delete('/api/activities/:id', (req, res) => {
-  db.run('DELETE FROM activities WHERE id = ?', req.params.id, (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Deleted' });
+  const { id } = req.params;
+  const query = `DELETE FROM activities WHERE id = ?`;
+
+  db.run(query, [id], function(err) {
+    if (err) {
+      return res.status(500).json({ message: 'Failed to delete activity.' });
+    }
+    res.json({ message: 'Activity deleted successfully!' });
   });
 });
 
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+
+// Simulan ang Server
+app.listen(PORT, () => {
+  console.log(`StudySuite Server is running on http://localhost:${PORT}`);
+});

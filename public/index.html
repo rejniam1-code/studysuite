@@ -3,1123 +3,1673 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Task Management System - StudySuite</title>
+  <title>StudySuite - CodeChum Style Portal</title>
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #151d30;
-      --text: #ffffff;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
       --text-dim: #94a3b8;
-      --border: #232d42;
-      --accent: #10b981;
+      --border: #334155;
+      --primary: #10b981;
+      --primary-hover: #059669;
       --danger: #ef4444;
       --success: #22c55e;
-      --warning: #f59e0b;
     }
-
-    .light-mode {
+    
+    [data-theme="light"] {
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --text: #0f172a;
       --text-dim: #64748b;
-      --border: #e2e8f0;
-      --accent: #059669;
+      --border: #cbd5e1;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --danger: #dc2626;
+      --success: #16a34a;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+    
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .hidden { display: none !important; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    button, input, select, textarea { font-family: inherit; font-size: 14px; outline: none; border-radius: 6px; }
+    input, select, textarea { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); margin-top: 5px; margin-bottom: 15px; }
+    select option { background: var(--card-bg); color: var(--text); }
+    button { cursor: pointer; padding: 10px 16px; background: var(--primary); color: #fff; border: none; font-weight: 600; transition: background 0.2s; }
+    button:hover { background: var(--primary-hover); }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
-    }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .logo { font-size: 20px; font-weight: bold; color: var(--primary); cursor: pointer; }
 
-    .container {
-      width: 100%;
-      max-width: 950px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    }
+    .auth-container { max-width: 480px; margin: 40px auto; width: 100%; text-align: left; }
+    .steps-container { display: flex; justify-content: center; gap: 12px; align-items: center; margin-bottom: 25px; position: relative; }
+    .steps-container::before { content: ''; position: absolute; top: 50%; left: 15%; right: 15%; height: 2px; background: var(--border); transform: translateY(-50%); z-index: 1; }
+    .step-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--card-bg); border: 2px solid var(--border); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 12px; color: var(--text-dim); position: relative; z-index: 2; }
+    .step-dot.active { border-color: var(--primary); background: var(--primary); color: #fff; }
 
-    @media (max-width: 600px) {
-      body { padding: 6px; }
-      .container { padding: 16px; border-radius: 8px; }
-    }
+    .password-wrapper { position: relative; margin-top: 5px; margin-bottom: 15px; }
+    .password-wrapper input { margin-top: 0; margin-bottom: 0; padding-right: 45px; }
+    .toggle-password-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 4px; font-weight: 600; }
+    .toggle-password-btn:hover { color: var(--primary); background: transparent; }
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
+    .role-selector { display: flex; gap: 15px; margin-bottom: 20px; }
+    .role-card { flex: 1; border: 2px solid var(--border); border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.02); transition: 0.2s; }
+    .role-card.selected { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); }
 
-    h1, h2, h3, h4 { margin-bottom: 12px; }
+    .dropdown-container { position: relative; width: 100%; }
+    .dropdown-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; max-height: 220px; overflow-y: auto; z-index: 100; box-shadow: 0 8px 16px rgba(0,0,0,0.3); display: none; margin-top: -10px; }
+    .dropdown-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
+    .dropdown-item:hover { background: rgba(16, 185, 129, 0.15); }
+    .dropdown-item-title { font-weight: 600; font-size: 14px; color: var(--text); }
+    .dropdown-item-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
-    .form-group {
-      margin-bottom: 14px;
-      text-align: left;
-    }
+    .classes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+    .class-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: 0.2s; position: relative; }
+    .class-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    
+    .school-badge { display: inline-block; width: 45px; height: 45px; background: rgba(16, 185, 129, 0.2); color: var(--primary); border-radius: 8px; text-align: center; line-height: 45px; font-weight: bold; font-size: 16px; margin-bottom: 12px; border: 1px solid var(--primary); }
 
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-    }
+    .create-class-card { border: 2px dashed var(--border); border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.01); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.2s; color: var(--text-dim); }
+    .create-class-card:hover { border-color: var(--primary); color: var(--primary); }
 
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-card { background: var(--card-bg); border: 1px solid var(--border); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-    }
+    .class-nav { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .class-nav-tab { cursor: pointer; padding: 6px 12px; font-weight: 600; color: var(--text-dim); border-radius: 6px; }
+    .class-nav-tab.active { background: var(--primary); color: #fff; }
 
-    select option {
-      background: var(--card-bg);
-      color: var(--text);
-    }
+    .cc-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
+    .cc-sidebar { display: flex; flex-direction: column; gap: 10px; }
+    .cc-sidebar-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 14px 16px; text-align: left; border-radius: 8px; color: var(--text); font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+    .cc-sidebar-btn.active { border-color: var(--primary); background: rgba(16, 185, 129, 0.1); color: var(--primary); }
+    
+    .topic-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+    .topic-header { padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+    .topic-body { padding: 15px 18px; font-size: 13px; color: var(--text-dim); }
 
-    /* PASSWORD WRAPPER FOR EYE TOGGLE */
-    .password-wrapper {
-      position: relative;
-    }
-    .password-wrapper input {
-      padding-right: 42px;
-    }
-    .toggle-password {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      font-size: 16px;
-      user-select: none;
-      opacity: 0.7;
-    }
-    .toggle-password:hover {
-      opacity: 1;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: var(--accent);
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      transition: opacity 0.2s;
-      margin-top: 6px;
-    }
-
-    button:hover { opacity: 0.9; }
-
-    .btn-del {
-      background: var(--danger);
-      width: auto;
-      padding: 6px 12px;
-      font-size: 12px;
-      margin: 0;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .stat-card.active-filter {
-      border-color: var(--accent);
-      background: rgba(16, 185, 129, 0.1);
-    }
-
-    .activity-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-
-    .activity-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .priority-badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-    .p-High { background: var(--danger); color: white; }
-    .p-Medium { background: var(--warning); color: black; }
-    .p-Low { background: var(--success); color: white; }
-
-    .notes-box {
-      font-size: 12px;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 8px;
-      border-radius: 4px;
-      margin: 8px 0;
-    }
-
-    .action-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 768px) {
-      .grid-2 { grid-template-columns: 1fr; }
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-top: 10px;
-    }
-
-    .cal-cell {
-      border: 1px solid var(--border);
-      min-height: 45px;
-      padding: 4px;
-      font-size: 12px;
-      position: relative;
-    }
-
-    .cal-cell.has-task { border-color: var(--accent); }
-    .cal-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-    }
-
-    .cal-tooltip {
-      display: none;
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      padding: 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .cal-cell:hover .cal-tooltip { display: block; }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 15px;
-    }
-
-    .modal-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      padding: 24px;
-      border-radius: 12px;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      text-align: center;
-    }
-
-    .modal-icon {
-      font-size: 36px;
-      margin-bottom: 10px;
-    }
+    .progress-bar-container { background: rgba(255,255,255,0.05); border-radius: 8px; height: 10px; width: 100%; overflow: hidden; margin-top: 5px; border: 1px solid var(--border); }
+    .progress-bar-fill { background: var(--success); height: 100%; width: 0%; transition: width 0.3s ease; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <div class="top-bar">
-      <h2>🎓 StudySuite</h2>
-      <div style="display: flex; gap: 8px;">
-        <button onclick="toggleTheme()" class="btn-secondary" style="width: auto; padding: 6px 12px; margin: 0;">🌓 Theme</button>
+    <header>
+      <div class="logo" onclick="goToDashboard()">📚 StudySuite</div>
+      <div id="userHeaderPanel" class="hidden" style="display: flex; align-items: center; gap: 15px;">
+        <span id="welcomeUser" onclick="openProfileSettings()" style="font-size: 14px; color: var(--text-dim); cursor: pointer; text-decoration: underline;" title="Customize Profile"></span>
+        <button onclick="toggleTheme()" style="padding: 6px 12px; font-size: 12px; background: transparent; border: 1px solid var(--border); color: var(--text);">Toggle Theme</button>
+        <button onclick="logout()" style="padding: 6px 12px; background: var(--danger);">Sign Out</button>
       </div>
-    </div>
+    </header>
 
     <!-- GREETING SCREEN -->
-    <div id="viewGreeting" style="display: block; text-align: center; padding: 20px 0;">
-      <h1 style="color: var(--accent); font-size: 28px;">Welcome to StudySuite</h1>
-      <p style="color: var(--text-dim); margin-bottom: 24px; font-size: 15px;">Organize your subjects, track academic deadlines, and manage tasks efficiently.</p>
-      <button onclick="showView('viewSignin')" style="max-width: 280px;">Proceed to System →</button>
+    <div id="greetingScreen" class="auth-container card" style="text-align: center;">
+      <h1 style="font-size: 24px; margin-bottom: 10px; color: var(--primary);">Welcome to StudySuite</h1>
+      <p style="color: var(--text-dim); margin-bottom: 25px; font-size: 14px;">Your ultimate platform for managing academic classes efficiently.</p>
+      <button onclick="openSignupStep1()" style="margin-bottom: 12px; width: 100%;">Get Started (Sign Up)</button>
+      <button onclick="openLoginScreen()" style="background: transparent; border: 1px solid var(--border); color: var(--text); width: 100%;">Sign In</button>
     </div>
 
-    <!-- SIGN IN SCREEN -->
-    <div id="viewSignin" style="display: none; max-width: 450px; margin: 0 auto;">
-      <button onclick="showView('viewGreeting')" class="btn-secondary" style="width: auto; padding: 4px 10px; font-size: 12px; margin-bottom: 15px;">← Back</button>
-      <h2 style="text-align: center; color: var(--accent);">Sign In</h2>
-      
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="loginEmail" placeholder="student@example.com" autocomplete="off">
+    <!-- SIGN UP STEP 1 -->
+    <div id="signupStep1" class="auth-container card hidden">
+      <div class="steps-container" id="signupStepIndicator">
+        <div class="step-dot active">1</div>
+        <div class="step-dot">2</div>
+        <div class="step-dot" id="dot3">3</div>
+        <div class="step-dot" id="dot4">4</div>
       </div>
+      <h2>Create an Account</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Step 1: Enter your display name.</p>
+      <form id="signupStep1Form" onsubmit="processSignupStep1(); return false;">
+        <label>First Name*</label>
+        <input type="text" id="su-firstname" required placeholder="First Name" autocomplete="off">
+        <label>Last Name*</label>
+        <input type="text" id="su-lastname" required placeholder="Last Name" autocomplete="off">
+        <button type="submit" style="width: 100%; margin-top: 10px;">Next Step</button>
+      </form>
+    </div>
+
+    <!-- SIGN UP STEP 2 -->
+    <div id="signupStep2" class="auth-container card hidden">
+      <div class="steps-container">
+        <div class="step-dot">1</div>
+        <div class="step-dot active">2</div>
+        <div class="step-dot" id="dot3-s2">3</div>
+        <div class="step-dot" id="dot4-s2">4</div>
+      </div>
+      <h2>Create an Account</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Step 2: Set your email and password.</p>
+      <form id="signupStep2Form" onsubmit="processSignupStep2(); return false;">
+        <label>Email Address*</label>
+        <input type="email" id="su-email" required placeholder="name@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+        
+        <label>Password*</label>
+        <div class="password-wrapper">
+          <input type="password" id="su-password" required placeholder="Password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('su-password', this)">Show</button>
+        </div>
+
+        <label>Confirm Password*</label>
+        <div class="password-wrapper">
+          <input type="password" id="su-confirmpassword" required placeholder="Confirm Password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('su-confirmpassword', this)">Show</button>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button type="button" onclick="openSignupStep1()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Back</button>
+          <button type="submit" style="flex: 1;">Next Step</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SIGN UP STEP 3 -->
+    <div id="signupStep3" class="auth-container card hidden" style="text-align: center;">
+      <div class="steps-container">
+        <div class="step-dot">1</div>
+        <div class="step-dot">2</div>
+        <div class="step-dot active">3</div>
+        <div class="step-dot">4</div>
+      </div>
+      <h2 style="margin-bottom: 5px;">Select Your Role</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Step 3: Are you a teacher or a student?</p>
       
-      <div class="form-group">
+      <div class="role-selector">
+        <div class="role-card" id="card-Teacher" onclick="selectRole('Teacher')">
+          <div style="font-size: 28px;">🎓</div>
+          <h4 style="margin-top: 8px;">Teacher</h4>
+        </div>
+        <div class="role-card" id="card-Student" onclick="selectRole('Student')">
+          <div style="font-size: 28px;">👤</div>
+          <h4 style="margin-top: 8px;">Student</h4>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button type="button" onclick="openSignupStep2()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Back</button>
+        <button id="step3NextBtn" onclick="processSignupStep3()" disabled style="opacity: 0.5; flex: 1;">Next Step</button>
+      </div>
+    </div>
+
+    <!-- SIGN UP STEP 4 (TEACHER ONLY - UNIVERSITY SELECTION) -->
+    <div id="signupStep4" class="auth-container card hidden" style="text-align: center;">
+      <div class="steps-container">
+        <div class="step-dot">1</div>
+        <div class="step-dot">2</div>
+        <div class="step-dot">3</div>
+        <div class="step-dot active">4</div>
+      </div>
+      <h2 style="margin-bottom: 5px;">Choose Your University</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Step 4: Select your school in Bulacan.</p>
+      
+      <div style="text-align: left; margin-bottom: 15px;">
+        <label>University / College name*</label>
+        <div class="dropdown-container">
+          <input type="text" id="uniSearchInput" placeholder="🔍 Search school in Bulacan..." autocomplete="off" oninput="filterSchoolList()" onfocus="showSchoolList()">
+          <div id="uniDropdownList" class="dropdown-list"></div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button type="button" onclick="openSignupStep3()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Back</button>
+        <button id="step4NextBtn" onclick="confirmAction('Details are complete. Save and finish sign up?', executeFinalSignUp)" disabled style="opacity: 0.5; flex: 1;">Complete Sign Up</button>
+      </div>
+    </div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="auth-container card hidden">
+      <h2>Welcome Back</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Sign in to your account.</p>
+      <form id="loginFormElement" onsubmit="confirmAction('Sign in to StudySuite?', executeLogin); return false;">
+        <label>Email Address</label>
+        <input type="email" id="li-email" required placeholder="name@example.com" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+        
         <label>Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="new-password">
-          <span class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)">👁️</span>
+        <div class="password-wrapper" style="margin-bottom: 15px;">
+          <input type="password" id="li-password" required placeholder="Password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" style="margin-bottom: 0;">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('li-password', this)">Show</button>
         </div>
-      </div>
-      
-      <div style="text-align: right; font-size: 12px; margin-bottom: 15px;">
-        <a href="#" onclick="showView('viewForgotReq')" style="color: var(--accent); text-decoration: none;">Forgot Password?</a>
-      </div>
 
-      <button onclick="handleSignin()">Sign In</button>
-      <p style="font-size: 13px; text-align: center; color: var(--text-dim); margin-top: 15px;">
-        Don't have an account? <a href="#" onclick="showView('viewSignup')" style="color: var(--accent); text-decoration: none; font-weight: bold;">Sign Up</a>
-      </p>
+        <button type="submit" style="width: 100%;">Sign In</button>
+      </form>
     </div>
 
-    <!-- SIGN UP VIEW -->
-    <div id="viewSignup" style="display: none; max-width: 480px; margin: 0 auto;">
-      <button onclick="showView('viewSignin')" class="btn-secondary" style="width: auto; padding: 4px 10px; font-size: 12px; margin-bottom: 15px;">← Back to Sign In</button>
-      <h2 style="color: var(--accent);">Create Account</h2>
-
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="regName" placeholder="e.g. Juan Dela Cruz" autocomplete="off">
+    <!-- TEACHER DASHBOARD -->
+    <div id="teacherDashboard" class="hidden" style="width: 100%;">
+      <div style="margin-bottom: 20px;">
+        <h2 style="margin-bottom: 5px;">Active Classes</h2>
+        <p style="color: var(--text-dim); font-size: 13px;" id="teacherSchoolHeaderDisplay">School: University</p>
       </div>
-      
-      <div class="form-group">
-        <label>Course / Major</label>
-        <select id="regCourse">
-          <option value="" disabled selected>-- Select your Course --</option>
-          <option value="BSCS (Computer Science)">BSCS (Computer Science)</option>
-          <option value="BSHM (Hospitality Management)">BSHM (Hospitality Management)</option>
-          <option value="BEED (Elementary Education)">BEED (Elementary Education)</option>
-          <option value="BSED (Secondary Education)">BSED (Secondary Education)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Year Level</label>
-        <select id="regYear">
-          <option value="1st Year">1st Year</option>
-          <option value="2nd Year" selected>2nd Year</option>
-          <option value="3rd Year">3rd Year</option>
-          <option value="4th Year">4th Year</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="regEmail" placeholder="student@example.com" autocomplete="off">
-      </div>
-      
-      <div class="form-group">
-        <label>Password (8 to 20 characters)</label>
-        <div class="password-wrapper">
-          <input type="password" id="regPassword" placeholder="••••••••" minlength="8" maxlength="20" autocomplete="new-password">
-          <span class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">👁️</span>
-        </div>
-        <button type="button" onclick="suggestPassword()" class="btn-secondary" style="margin-top: 6px; font-size: 12px; padding: 6px;">💡 Suggest Strong Password</button>
-      </div>
-      
-      <button onclick="handleSignup()">Complete Registration</button>
+      <div class="classes-grid" id="classesGridContainer"></div>
     </div>
 
-    <!-- FORGOT PASSWORD - REQUEST OTP -->
-    <div id="viewForgotReq" style="display: none; max-width: 450px; margin: 0 auto;">
-      <h2>Reset Password</h2>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="forgotEmail" placeholder="student@example.com" autocomplete="off">
-      </div>
-      <button onclick="handleForgotReq()">Send OTP Code</button>
-      <button onclick="showView('viewSignin')" class="btn-secondary">Back to Sign In</button>
-    </div>
-
-    <!-- FORGOT PASSWORD - RESET WITH OTP -->
-    <div id="viewForgotReset" style="display: none; max-width: 450px; margin: 0 auto;">
-      <h2>Set New Password</h2>
-      <div class="form-group">
-        <label>OTP Code</label>
-        <input type="text" id="otpCode" placeholder="Enter 6-digit code" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label>New Password (8-20 characters)</label>
-        <div class="password-wrapper">
-          <input type="password" id="newPassword" placeholder="••••••••" minlength="8" maxlength="20" autocomplete="new-password">
-          <span class="toggle-password" onclick="togglePasswordVisibility('newPassword', this)">👁️</span>
-        </div>
-      </div>
-      <button onclick="handleForgotReset()">Update Password</button>
-    </div>
-
-    <!-- MAIN SYSTEM DASHBOARD -->
-    <div id="main-system" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    <!-- STUDENT DASHBOARD -->
+    <div id="studentDashboard" class="hidden" style="width: 100%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-          <h3 style="margin: 0;">Hello, <span id="userName" style="color: var(--accent);">Student</span>! 👋</h3>
-          <small id="userCourseTag" style="color: var(--text-dim);"></small>
+          <h2>Student Portal</h2>
+          <p style="color: var(--text-dim); font-size: 13px;" id="studentSchoolSubtitle">Enrolled classes and assigned tasks.</p>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button onclick="openProfileSettings()" class="btn-secondary" style="width: auto; padding: 6px 12px; margin: 0;">⚙️ Settings</button>
-          <button onclick="confirmLogout()" class="btn-del" style="margin: 0; width: auto; padding: 6px 12px;">Logout</button>
-        </div>
+        <button onclick="openJoinClassModal()" style="padding: 10px 18px;">+ Join Class</button>
       </div>
+      <div class="classes-grid" id="studentClassesGridContainer"></div>
+    </div>
 
-      <!-- METRIC CARDS -->
-      <div class="stats-grid">
-        <div class="stat-card active-filter" id="cardAll" onclick="setFilter('ALL')">
-          <small>Total</small>
-          <h2 id="statTotal">0</h2>
-        </div>
-        <div class="stat-card" id="cardPending" onclick="setFilter('Pending')">
-          <small>Pending</small>
-          <h2 id="statPending" style="color: var(--warning);">0</h2>
-        </div>
-        <div class="stat-card" id="cardProgress" onclick="setFilter('In Progress')">
-          <small>In Progress</small>
-          <h2 id="statProgress" style="color: var(--accent);">0</h2>
-        </div>
-        <div class="stat-card" id="cardCompleted" onclick="setFilter('Completed')">
-          <small>Completed</small>
-          <h2 id="statCompleted" style="color: var(--success);">0</h2>
-        </div>
-      </div>
+    <!-- JOIN CLASS MODAL -->
+    <div id="joinClassModal" class="modal-overlay hidden">
+      <div class="modal-card" style="max-width: 480px; text-align: left;">
+        <h3>Join Class</h3>
+        <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 15px;">Enter the class code provided by your professor.</p>
+        
+        <div id="joinStep1">
+          <label>Full Name*</label>
+          <input type="text" id="joinStudentName" required placeholder="e.g. Juan Dela Cruz">
+          
+          <label>Course*</label>
+          <select id="joinStudentCourseDropdown" required>
+            <option value="BSCS">BSCS</option>
+            <option value="BEED">BEED</option>
+            <option value="BSHM">BSHM</option>
+            <option value="BSED">BSED</option>
+          </select>
 
-      <div class="grid-2">
-        <!-- LEFT COLUMN -->
-        <div>
-          <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px;">
-            <h4>📚 Subjects</h4>
-            <div class="form-group">
-              <input type="text" id="subCode" placeholder="Subject Code (e.g., CS101)" autocomplete="off">
-            </div>
-            <div class="form-group">
-              <input type="text" id="subName" placeholder="Subject Title" autocomplete="off">
-            </div>
-            <button onclick="addSubject()">+ Add Subject</button>
-            <div id="subjectList" style="max-height: 120px; overflow-y: auto; margin-top: 10px;"></div>
-          </div>
+          <label>Year Level*</label>
+          <select id="joinStudentYearLvl" required>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+          </select>
 
-          <div style="background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border);">
-            <h4>➕ New Activity</h4>
-            <div class="form-group">
-              <label>Activity Title *</label>
-              <input type="text" id="actTitle" placeholder="e.g. Midterm Lab Exercise" autocomplete="off">
-            </div>
-            <div class="form-group">
-              <label>Subject</label>
-              <select id="actSubject"><option value="General">General</option></select>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <div class="form-group">
-                <label>Priority</label>
-                <select id="actPriority">
-                  <option value="Low">Low</option>
-                  <option value="Medium" selected>Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Due Date</label>
-                <input type="date" id="actDate">
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Time</label>
-              <input type="time" id="actTime">
-            </div>
-            <div class="form-group">
-              <label>Additional Notes</label>
-              <textarea id="actNotes" placeholder="Details or instructions..." rows="2"></textarea>
-            </div>
-            <button onclick="addActivity()">Save Activity</button>
+          <label>Enter Class Code (e.g. A4B-9X2-M7K)*</label>
+          <input type="text" id="joinClassCodeInput" placeholder="xxx-xxx-xxx" style="text-transform: uppercase;" autocomplete="off">
+
+          <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button type="button" onclick="closeJoinClassModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text); flex: 1;">Cancel</button>
+            <button type="button" onclick="verifyClassCode()" style="flex: 1;">Next / Verify Code</button>
           </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <div>
-          <h4 id="listHeader">📌 Activity List (ALL)</h4>
-          <div id="activityList" style="max-height: 320px; overflow-y: auto; margin-bottom: 20px;"></div>
-
-          <h4>📅 Deadlines Calendar</h4>
-          <div class="calendar-grid" id="calendarCells"></div>
+        <div id="joinStep2" class="hidden">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <h4 id="previewClassName" style="color: var(--primary); margin-bottom: 4px;"></h4>
+            <p id="previewClassMeta" style="font-size: 13px; color: var(--text-dim); margin-bottom: 8px;"></p>
+            <p id="previewClassDesc" style="font-size: 13px; color: var(--text);"></p>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
+            <p style="font-size: 11px; color: var(--text-dim);">Professor: <span id="previewClassProf" style="font-weight: 600; color: var(--text);"></span></p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" onclick="backToJoinStep1()" style="background: transparent; border: 1px solid var(--border); color: var(--text); flex: 1;">Back</button>
+            <button type="button" onclick="confirmJoinClass()" style="flex: 1;">Join Class</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- PROFILE SETTINGS MODAL -->
-  <div class="modal-overlay" id="profileModal" style="display: none;">
-    <div class="modal-box" style="text-align: left;">
-      <h3 style="color: var(--accent); margin-bottom: 15px; text-align: center;">⚙️ Account Settings</h3>
-      
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="settingsName" autocomplete="off">
+    <!-- STUDENT SUBMIT TASK MODAL -->
+    <div id="studentSubmitModal" class="modal-overlay hidden">
+      <div class="modal-card" style="max-width: 480px; text-align: left;">
+        <h3>Submit Activity / Task</h3>
+        <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 15px;" id="submitTaskModalTitle">Upload your work or provide your answers.</p>
+        <input type="hidden" id="submitTaskId">
+        <input type="hidden" id="submitTaskTeacherEmail">
+        <label>Upload File (PDF, Word, Code, Image)*</label>
+        <input type="file" id="studentSubmissionFile" required style="padding: 6px;">
+        <label>Optional Notes or Answer Description</label>
+        <textarea id="studentSubmissionNotes" rows="3" placeholder="Add comments or instructions for your professor..."></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button type="button" onclick="closeStudentSubmitModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text); flex: 1;">Cancel</button>
+          <button type="button" onclick="executeStudentSubmit()" style="flex: 1;">Submit Work</button>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Course / Major</label>
-        <select id="settingsCourse">
-          <option value="BSCS (Computer Science)">BSCS (Computer Science)</option>
-          <option value="BSHM (Hospitality Management)">BSHM (Hospitality Management)</option>
-          <option value="BEED (Elementary Education)">BEED (Elementary Education)</option>
-          <option value="BSED (Secondary Education)">BSED (Secondary Education)</option>
-        </select>
+    </div>
+
+    <!-- PROFILE SETTINGS -->
+    <div id="profileSettingsView" class="auth-container card hidden">
+      <h2>Customize Profile</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Update your personal info or delete your account.</p>
+      <form id="profileFormElement" onsubmit="confirmAction('Save profile changes?', executeUpdateProfile); return false;">
+        <label>First Name*</label>
+        <input type="text" id="pf-firstname" required placeholder="First Name" autocomplete="off">
+        <label>Last Name*</label>
+        <input type="text" id="pf-lastname" required placeholder="Last Name" autocomplete="off">
+        <label>Email Address*</label>
+        <input type="email" id="pf-email" required placeholder="name@example.com" autocomplete="off" readonly>
+        <div id="pfUniversityContainer">
+          <label>University / School</label>
+          <input type="text" id="pf-university" readonly style="opacity: 0.7;">
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button type="button" onclick="goToDashboard()" style="background: transparent; border: 1px solid var(--border); color: var(--text); flex: 1;">Cancel</button>
+          <button type="submit" style="flex: 1;">Save Changes</button>
+        </div>
+      </form>
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 25px 0;">
+      <div style="text-align: center;">
+        <button type="button" onclick="confirmAction('Are you sure you want to delete your account?', executeDeleteAccount)" style="background: var(--danger); width: 100%;">Delete Account</button>
       </div>
-      <div class="form-group">
-        <label>Year Level</label>
-        <select id="settingsYear">
+    </div>
+
+    <!-- CREATE CLASS FORM -->
+    <div id="createClassView" class="auth-container card hidden">
+      <h2>Create New Class</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Fill in the details for your class.</p>
+      <form id="createClassFormElement" onsubmit="confirmAction('Create and open this new class?', executeCreateClass); return false;">
+        <label>Class Name*</label>
+        <input type="text" id="className" required placeholder="e.g. PELEC 102" autocomplete="off" oninput="this.value = this.value.toUpperCase();">
+        
+        <label>Year / Level*</label>
+        <select id="classYear" required>
           <option value="1st Year">1st Year</option>
           <option value="2nd Year">2nd Year</option>
           <option value="3rd Year">3rd Year</option>
           <option value="4th Year">4th Year</option>
         </select>
+
+        <label>Subject / Course Description*</label>
+        <input type="text" id="classSubject" required placeholder="e.g. Game Development" autocomplete="off">
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button type="button" onclick="goToDashboard()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Cancel</button>
+          <button type="submit">Create Class</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- EDIT CLASS FORM -->
+    <div id="editClassView" class="auth-container card hidden">
+      <h2>Edit Class Details</h2>
+      <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Update class name, year, or course.</p>
+      <form id="editClassFormElement" onsubmit="confirmAction('Save changes to this class?', executeEditClass); return false;">
+        <label>Class Name*</label>
+        <input type="text" id="editClassName" required placeholder="e.g. PELEC 102" autocomplete="off" oninput="this.value = this.value.toUpperCase();">
+        
+        <label>Year / Level*</label>
+        <select id="editClassYear" required>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+          <option value="4th Year">4th Year</option>
+        </select>
+
+        <label>Subject / Course Description*</label>
+        <input type="text" id="editClassSubject" required placeholder="e.g. Game Development" autocomplete="off">
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button type="button" onclick="openClassView(activeClassId)" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Cancel</button>
+          <button type="submit" style="flex: 1;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- EDIT LESSON MODAL -->
+    <div id="editLessonModal" class="modal-overlay hidden">
+      <div class="modal-card" style="max-width: 480px; text-align: left;">
+        <h3>Edit Lesson / Topic</h3>
+        <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 15px;">Update lesson details or replace file material.</p>
+        <input type="hidden" id="editLessonId">
+        <label>Lesson Title*</label>
+        <input type="text" id="editLessonTitleInput" required placeholder="Topic Title">
+        <label>Description or Instructions</label>
+        <textarea id="editLessonDescInput" rows="3"></textarea>
+        <label>Upload File (PDF, Word, PPT, Image)</label>
+        <input type="file" id="editLessonFileInput" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" style="padding: 6px;">
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button type="button" onclick="closeEditLessonModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text); flex: 1;">Cancel</button>
+          <button type="button" onclick="saveEditedLesson()" style="flex: 1;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT TASK MODAL -->
+    <div id="editTaskModal" class="modal-overlay hidden">
+      <div class="modal-card" style="max-width: 480px; text-align: left;">
+        <h3>Edit Task / Activity</h3>
+        <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 15px;">Update schedules, title, or instructions.</p>
+        <input type="hidden" id="editTaskId">
+        <label>Title*</label>
+        <input type="text" id="editTaskTitle" required>
+        <label>Category</label>
+        <select id="editTaskType">
+          <option value="Activity">Activity</option>
+          <option value="Quiz">Online Quiz</option>
+        </select>
+        <label>Open Date & Time (Kailan bubukas/ma-uunlock)</label>
+        <input type="datetime-local" id="editTaskOpenDate">
+        <label>Deadline (Hanggang kailan puwedeng ipasa)</label>
+        <input type="datetime-local" id="editTaskDueDate">
+        <label>Instructions / Description</label>
+        <textarea id="editTaskDesc" rows="3"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+          <button type="button" onclick="closeEditTaskModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text); flex: 1;">Cancel</button>
+          <button type="button" onclick="saveEditedTask()" style="flex: 1;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CODECHUM STYLE DEDICATED CLASS VIEW -->
+    <div id="singleClassView" class="hidden" style="width: 100%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <button onclick="goToDashboard()" style="width: auto; padding: 6px 12px; background: transparent; border: 1px solid var(--border); color: var(--text);">← Back to Classes</button>
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <h2 id="currentClassNameDisplay" style="color: var(--primary);">Class Name</h2>
+              <span id="classCodeBadgeDisplay" style="background: rgba(16, 185, 129, 0.15); color: var(--primary); border: 1px solid var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;"></span>
+            </div>
+            <p id="currentClassMetaDisplay" style="color: var(--text-dim); font-size: 13px;"></p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;" id="teacherClassActions">
+          <button onclick="openEditClassForm()" style="padding: 6px 12px; font-size: 12px; background: rgba(255,255,255,0.1); border: 1px solid var(--border);">✏️ Edit Class</button>
+          <button onclick="confirmAction('Are you sure you want to delete this class and all its associated tasks?', executeDeleteClass)" style="padding: 6px 12px; font-size: 12px; background: var(--danger);">🗑️ Delete Class</button>
+        </div>
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button onclick="saveProfileSettings()" style="margin: 0;">Save Changes</button>
-        <button onclick="closeProfileSettings()" class="btn-secondary" style="margin: 0;">Cancel</button>
+      <!-- Top Main Navigation Tabs inside Class -->
+      <div class="class-nav" id="classNavTabsContainer">
+        <div class="class-nav-tab active" onclick="switchClassMainTab('lessonsMainTab')">Activities & Lessons (CodeChum Style)</div>
+        <div class="class-nav-tab" id="rosterNavTabBtn" onclick="switchClassMainTab('rosterMainTab')">Class Roster & Compliance Record</div>
+        <div class="class-nav-tab" onclick="switchClassMainTab('bulletinMainTab')">Bulletin / Announcements</div>
       </div>
 
-      <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-      
-      <div style="text-align: center;">
-        <p style="font-size: 12px; color: var(--danger); margin-bottom: 10px;">Danger Zone: Deleting your account will remove all your data permanently.</p>
-        <button onclick="confirmDeleteAccount()" class="btn-del" style="width: 100%;">🗑️ Delete My Account</button>
+      <!-- LESSONS & ACTIVITIES MAIN TAB -->
+      <div id="lessonsMainTab" class="class-main-tab-content">
+        <div class="cc-layout">
+          <!-- CodeChum Style Sidebar -->
+          <div class="cc-sidebar">
+            <button class="cc-sidebar-btn active" onclick="switchCcSubTab('courseSub', this)">
+              <span>Course / Lessons</span> <span>⭐</span>
+            </button>
+            <button class="cc-sidebar-btn" onclick="switchCcSubTab('teacherSub', this)">
+              <span>Created by Teacher</span> <span>⭐</span>
+            </button>
+          </div>
+
+          <!-- Content Area -->
+          <div>
+            <!-- COURSE / LESSONS SUB-TAB -->
+            <div id="courseSubTabContent" class="cc-sub-content">
+              <div id="teacherAddLessonBox" class="card" style="margin-bottom: 20px; border-style: dashed;">
+                <h3>➕ Add New Lesson (Topic)</h3>
+                <form id="addLessonForm" onsubmit="executeAddLesson(); return false;" style="margin-top: 10px;">
+                  <label>Lesson / Topic Title*</label>
+                  <input type="text" id="lessonTitleInput" required placeholder="e.g. Topic 1: Overview">
+                  <label>Description / Instructions</label>
+                  <textarea id="lessonDescInput" rows="2" placeholder="Enter lesson instructions or description..."></textarea>
+                  <label>Upload File (Optional - PDF, Word, PPT, Image)</label>
+                  <input type="file" id="lessonFileInput" accept=".pdf,.doc,.docx,.ppt,.pptx,image/*" style="padding: 6px;">
+                  
+                  <label>Lock / Unlock Option*</label>
+                  <select id="lessonLockType" onchange="toggleLessonUnlockDateInput()">
+                    <option value="manual">Manual (Customized Open/Lock)</option>
+                    <option value="deadline">By Date & Time (Unlock Schedule)</option>
+                  </select>
+
+                  <div id="lessonUnlockDateWrapper" class="hidden">
+                    <label>Unlock Date & Time</label>
+                    <input type="datetime-local" id="lessonUnlockDate">
+                  </div>
+
+                  <label><input type="checkbox" id="lessonPublishToggle" checked style="width: auto; margin-right: 5px;"> Open / Visible to Students immediately</label>
+                  <button type="submit" style="width: 100%; margin-top: 10px;">Publish Lesson</button>
+                </form>
+              </div>
+
+              <div class="card">
+                <h3>📚 Class Lessons</h3>
+                <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;">List of topics and imported learning materials.</p>
+                <div id="lessonsListContainer"></div>
+              </div>
+            </div>
+
+            <!-- CREATED BY TEACHER SUB-TAB (CodeChum Style: Ongoing vs Completed Tasks) -->
+            <div id="teacherSubTabContent" class="cc-sub-content hidden">
+              <div id="teacherAddTaskBox" class="card" style="margin-bottom: 20px;">
+                <h3>Add Activity / Online Quiz</h3>
+                <form id="addItemFormElement" onsubmit="executeAddItemToClass(); return false;">
+                  <label>Title*</label>
+                  <input type="text" id="itemTitle" required placeholder="e.g. Laboratory Activity 1">
+                  <label>Category</label>
+                  <select id="itemType">
+                    <option value="Activity">Activity</option>
+                    <option value="Quiz">Online Quiz</option>
+                  </select>
+                  <label>Open Date & Time (Kailan bubukas para sa mga estudyante)</label>
+                  <input type="datetime-local" id="itemOpenDate">
+                  <label>Deadline (Hanggang kailan puwedeng ipasa)</label>
+                  <input type="datetime-local" id="itemDueDate">
+                  <label>Instructions / Description</label>
+                  <textarea id="itemDesc" rows="3" placeholder="Instructions..."></textarea>
+                  <button type="submit" style="width: 100%;">Publish Task</button>
+                </form>
+              </div>
+
+              <!-- CodeChum 2-Section Task View -->
+              <div class="card" style="margin-bottom: 20px;">
+                <h3 style="color: var(--primary); margin-bottom: 10px;">⏳ Ongoing Tasks</h3>
+                <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;">Pending activities and quizzes requiring completion.</p>
+                <div id="ongoingTasksContainer"></div>
+              </div>
+
+              <div class="card">
+                <h3 style="color: var(--success); margin-bottom: 10px;">✅ Completed Tasks</h3>
+                <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;">Submitted and completed assignments.</p>
+                <div id="completedTasksContainer"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- CLASS ROSTER & COMPLIANCE RECORD TAB (Teacher Only) -->
+      <div id="rosterMainTab" class="class-main-tab-content hidden">
+        <div class="card">
+          <h3>👥 Class Roster & Compliance Records</h3>
+          <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;">Select a specific activity to track student submissions and compliance percentages.</p>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="font-weight: 600;">Select Activity / Task to View:</label>
+            <select id="rosterActivitySelector" onchange="renderRosterTable()" style="margin-top: 5px;"></select>
+          </div>
+
+          <div id="rosterSummaryCard" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <span style="font-weight: 600; font-size: 14px;" id="complianceStatsText">Compliance Rate: 0%</span>
+              <span style="font-size: 13px; color: var(--text-dim);" id="complianceCountText">0 / 0 Submitted</span>
+            </div>
+            <div class="progress-bar-container">
+              <div id="complianceProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div id="rosterTableContainer"></div>
+        </div>
+      </div>
+
+      <!-- BULLETIN TAB -->
+      <div id="bulletinMainTab" class="class-main-tab-content hidden">
+        <div class="card" style="max-width: 600px;">
+          <h3>Class Bulletin</h3>
+          <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;">Post announcements for enrolled students.</p>
+          <div id="teacherBulletinInputBox">
+            <textarea id="bulletinText" rows="3" placeholder="Write an announcement..."></textarea>
+            <button onclick="confirmAction('Post this announcement?', executePostBulletin)">Post Announcement</button>
+          </div>
+          <div id="bulletinList" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div id="successModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div id="modalIcon" style="font-size: 40px; margin-bottom: 10px;">🎉</div>
+      <h3 id="modalTitle" style="color: var(--primary); margin-bottom: 10px;">Notice</h3>
+      <p id="modalMsg" style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px;"></p>
+      <button id="successOkBtn" onclick="closeSuccessModal()">OK</button>
     </div>
   </div>
 
-  <!-- MODAL -->
-  <div class="modal-overlay" id="customModal">
-    <div class="modal-box">
-      <div class="modal-icon" id="modalIcon">ℹ️</div>
-      <h3 id="modalTitle" style="margin-bottom: 8px;">Notice</h3>
-      <p id="modalMessage" style="font-size: 14px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.4;"></p>
-      <div id="modalActions" style="display: flex; gap: 10px; justify-content: center;">
-        <button id="modalPrimaryBtn" style="margin: 0;">OK</button>
-        <button id="modalCancelBtn" class="btn-secondary" style="display: none; margin: 0;">Cancel</button>
+  <!-- CONFIRMATION MODAL -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="font-size: 30px; margin-bottom: 10px;">⚠️</div>
+      <h3 style="color: var(--primary); margin-bottom: 10px;">Confirmation</h3>
+      <p id="confirmMsg" style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px;"></p>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="closeConfirmModal()" style="background: transparent; border: 1px solid var(--border); color: var(--text);">Cancel</button>
+        <button id="confirmOkBtn" style="background: var(--primary);">Ok / Proceed</button>
       </div>
     </div>
   </div>
 
   <script>
-    let currentFilter = 'ALL';
-    let activeUser = null;
-    let targetEmailForOtp = '';
-    let globalActivities = [];
+    const schoolList = [
+      { name: "Bulacan State University (BulSU) – Main Campus", location: "Malolos" },
+      { name: "Bulacan State University (BulSU) – Bustos Campus", location: "Bustos" },
+      { name: "Bulacan State University (BulSU) – Hagonoy Campus", location: "Hagonoy" },
+      { name: "Bulacan State University (BulSU) – San Rafael Campus", location: "San Rafael" },
+      { name: "Bulacan State University (BulSU) – San Jose del Monte Campus", location: "San Jose del Monte" },
+      { name: "Bulacan Agricultural State College (BASC) – San Ildefonso", location: "San Ildefonso" },
+      { name: "Bulacan Agricultural State College (BASC) – Doña Remedios Trinidad Extension", location: "Doña Remedios Trinidad" },
+      { name: "Polytechnic University of the Philippines (PUP) – Santa Maria Branch", location: "Santa Maria" },
+      { name: "Polytechnic University of the Philippines (PUP) – Pulilan Branch", location: "Pulilan" },
+      { name: "Norzagaray College – Norzagaray", location: "Norzagaray" },
+      { name: "Pambayang Dalubhasaan ng Marilao – Marilao", location: "Marilao" },
+      { name: "Baliwag Polytechnic College – Baliuag", location: "Baliuag" },
+      { name: "City College of San Jose del Monte – San Jose del Monte", location: "San Jose del Monte" },
+      { name: "Baliuag University – Baliuag", location: "Baliuag" },
+      { name: "Centro Escolar University (CEU) – Malolos", location: "Malolos" },
+      { name: "La Consolacion University Philippines (LCUP) – Malolos", location: "Malolos" },
+      { name: "Our Lady of Fatima University (OLFU) – San Jose del Monte", location: "San Jose del Monte" },
+      { name: "Dr. Yanga's Colleges, Inc. (DYCI) – Bocaue", location: "Bocaue" },
+      { name: "Meycauayan College – Meycauayan", location: "Meycauayan" },
+      { name: "St. Mary's College of Baliuag – Baliuag", location: "Baliuag" },
+      { name: "La Concepcion College (LCC) – San Jose del Monte", location: "San Jose del Monte" },
+      { name: "Colegio de San Gabriel Arcangel – San Jose del Monte", location: "San Jose del Monte" },
+      { name: "STI College – Malolos", location: "Malolos" },
+      { name: "STI College – Balagtas", location: "Balagtas" },
+      { name: "STI College – Baliuag", location: "Baliuag" },
+      { name: "STI College – Meycauayan", location: "Meycauayan" },
+      { name: "STI College – Santa Maria", location: "Santa Maria" }
+    ];
+
+    let tempSignupData = {};
+    let selectedRole = '';
+    let selectedUniversity = '';
+    let currentUser = JSON.parse(sessionStorage.getItem('studySuite_session')) || null;
+    let activeClassId = null;
+    let pendingAction = null;
+    let successModalCallback = null;
+    let tempJoinClassObj = null;
 
     window.addEventListener('DOMContentLoaded', () => {
-      showView('viewGreeting');
+      renderSchoolDropdown(schoolList);
+      if (currentUser && currentUser.email) {
+        let savedAccount = JSON.parse(localStorage.getItem(`studySuite_user_${currentUser.email.trim()}`));
+        if (savedAccount && savedAccount.role) {
+          currentUser = savedAccount;
+          sessionStorage.setItem('studySuite_session', JSON.stringify(currentUser));
+          if (currentUser.role === 'Teacher') {
+            goToTeacherDashboard();
+          } else {
+            goToStudentDashboard();
+          }
+          return;
+        }
+      }
+      switchScreen('greetingScreen');
     });
 
-    // CLEAR ALL INPUT FORMS FUNCTION
-    function clearAllForms() {
-      const inputs = document.querySelectorAll('input');
-      inputs.forEach(input => {
-        if (input.type !== 'checkbox' && input.type !== 'radio') {
-          input.value = '';
-        }
-      });
-      document.querySelectorAll('.password-wrapper input').forEach(input => {
-        input.type = 'password';
-      });
+    function showNotice(message, callback, isError = false) {
+      const iconEl = document.getElementById('modalIcon');
+      const titleEl = document.getElementById('modalTitle');
+      const okBtn = document.getElementById('successOkBtn');
+      if (isError) {
+        iconEl.innerText = '⚠️';
+        titleEl.innerText = 'Error / Warning';
+        titleEl.style.color = 'var(--danger)';
+        okBtn.style.background = 'var(--danger)';
+      } else {
+        iconEl.innerText = '🎉';
+        titleEl.innerText = 'Notice';
+        titleEl.style.color = 'var(--primary)';
+        okBtn.style.background = 'var(--primary)';
+      }
+      document.getElementById('modalMsg').innerHTML = message;
+      successModalCallback = callback || null;
+      document.getElementById('successModal').classList.remove('hidden');
     }
 
-    // PASSWORD EYE TOGGLE FUNCTION
-    function togglePasswordVisibility(inputId, iconEl) {
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.add('hidden');
+      if (successModalCallback) {
+        successModalCallback();
+        successModalCallback = null;
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btnEl) {
       const input = document.getElementById(inputId);
       if (input.type === 'password') {
         input.type = 'text';
-        iconEl.textContent = '🔒';
+        btnEl.innerText = 'Hide';
       } else {
         input.type = 'password';
-        iconEl.textContent = '👁️';
+        btnEl.innerText = 'Show';
       }
     }
 
-    function showNotice(title, message, icon = "ℹ️", onOk = null) {
-      document.getElementById('modalIcon').innerText = icon;
-      document.getElementById('modalTitle').innerText = title;
-      document.getElementById('modalMessage').innerText = message;
-      
-      const primaryBtn = document.getElementById('modalPrimaryBtn');
-      const cancelBtn = document.getElementById('modalCancelBtn');
-      
-      primaryBtn.innerText = "OK";
-      cancelBtn.style.display = "none";
-      
-      primaryBtn.onclick = () => {
-        closeCustomModal();
-        if (onOk) onOk();
-      };
-
-      document.getElementById('customModal').style.display = 'flex';
+    function openSignupStep1() { switchScreen('signupStep1'); }
+    function processSignupStep1() {
+      const firstname = document.getElementById('su-firstname').value.trim();
+      const lastname = document.getElementById('su-lastname').value.trim();
+      if (!firstname || !lastname) return;
+      tempSignupData.firstname = firstname;
+      tempSignupData.lastname = lastname;
+      switchScreen('signupStep2');
+    }
+    function openSignupStep2() { switchScreen('signupStep2'); }
+    function processSignupStep2() {
+      const email = document.getElementById('su-email').value.trim();
+      const password = document.getElementById('su-password').value.trim();
+      const confirmPassword = document.getElementById('su-confirmpassword').value.trim();
+      if (!email || !password || !confirmPassword) return;
+      if (password !== confirmPassword) {
+        showNotice("Password and Confirm Password do not match.", null, true);
+        return;
+      }
+      tempSignupData.email = email;
+      tempSignupData.password = password;
+      switchScreen('signupStep3');
+    }
+    function openSignupStep3() { switchScreen('signupStep3'); }
+    
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('card-Teacher').classList.remove('selected');
+      document.getElementById('card-Student').classList.remove('selected');
+      document.getElementById('card-' + role).classList.add('selected');
+      const btn = document.getElementById('step3NextBtn');
+      btn.disabled = false;
+      btn.style.opacity = '1';
     }
 
-    function showConfirm(title, message, onConfirm) {
-      document.getElementById('modalIcon').innerText = "⚠️";
-      document.getElementById('modalTitle').innerText = title;
-      document.getElementById('modalMessage').innerText = message;
-      
-      const primaryBtn = document.getElementById('modalPrimaryBtn');
-      const cancelBtn = document.getElementById('modalCancelBtn');
-      
-      primaryBtn.innerText = "Confirm";
-      cancelBtn.innerText = "Cancel";
-      cancelBtn.style.display = "block";
-      
-      primaryBtn.onclick = () => {
-        closeCustomModal();
-        onConfirm();
-      };
-      cancelBtn.onclick = closeCustomModal;
-
-      document.getElementById('customModal').style.display = 'flex';
+    function processSignupStep3() {
+      if (!selectedRole) return;
+      tempSignupData.role = selectedRole;
+      if (selectedRole === 'Teacher') {
+        switchScreen('signupStep4');
+      } else {
+        confirmAction('Details are complete. Save and finish sign up?', executeFinalSignUp);
+      }
     }
 
-    function closeCustomModal() {
-      document.getElementById('customModal').style.display = 'none';
+    function openLoginScreen() {
+      const form = document.getElementById('loginFormElement');
+      if (form) form.reset();
+      switchScreen('loginScreen');
     }
 
-    function showView(viewId) {
-      clearAllForms(); // Automatic na maglilinis ng inputs tuwing mag-switch ng view
-      
-      const views = ['viewGreeting', 'viewSignin', 'viewSignup', 'viewForgotReq', 'viewForgotReset', 'main-system'];
-      views.forEach(v => {
-        const el = document.getElementById(v);
-        if (el) el.style.display = (v === viewId) ? 'block' : 'none';
+    function renderSchoolDropdown(list) {
+      const dropdown = document.getElementById('uniDropdownList');
+      dropdown.innerHTML = '';
+      if (list.length === 0) {
+        dropdown.innerHTML = '<div class="dropdown-item"><div class="dropdown-item-title">No schools found in Bulacan</div></div>';
+        return;
+      }
+      list.forEach(school => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        item.innerHTML = `<div class="dropdown-item-title">${school.name}</div><div class="dropdown-item-sub">📍 Bulacan</div>`;
+        item.onclick = () => selectSchool(school.name);
+        dropdown.appendChild(item);
       });
+    }
+
+    function showSchoolList() { document.getElementById('uniDropdownList').style.display = 'block'; }
+    function filterSchoolList() {
+      const query = document.getElementById('uniSearchInput').value.toLowerCase();
+      const filtered = schoolList.filter(s => s.name.toLowerCase().includes(query) || s.location.toLowerCase().includes(query));
+      renderSchoolDropdown(filtered);
+      showSchoolList();
+    }
+    function selectSchool(name) {
+      selectedUniversity = name;
+      document.getElementById('uniSearchInput').value = name;
+      document.getElementById('uniDropdownList').style.display = 'none';
+      const btn = document.getElementById('step4NextBtn');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown-container')) {
+        const list = document.getElementById('uniDropdownList');
+        if (list) list.style.display = 'none';
+      }
+    });
+
+    function confirmAction(message, callback) {
+      document.getElementById('confirmMsg').innerText = message;
+      pendingAction = callback;
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      pendingAction = null;
+    }
+    document.getElementById('confirmOkBtn').onclick = function() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      if (pendingAction) { pendingAction(); pendingAction = null; }
+    };
+
+    function switchScreen(screenId) {
+      const screens = ['greetingScreen', 'signupStep1', 'signupStep2', 'signupStep3', 'signupStep4', 'loginScreen', 'teacherDashboard', 'studentDashboard', 'profileSettingsView', 'createClassView', 'editClassView', 'singleClassView'];
+      screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      document.getElementById('userHeaderPanel').classList.add('hidden');
+      const target = document.getElementById(screenId);
+      if (target) target.classList.remove('hidden');
+      const authScreens = ['greetingScreen', 'signupStep1', 'signupStep2', 'signupStep3', 'signupStep4', 'loginScreen'];
+      if (!authScreens.includes(screenId)) {
+        document.getElementById('userHeaderPanel').classList.remove('hidden');
+        document.getElementById('welcomeUser').innerText = `${currentUser.firstname || 'User'} (${currentUser.role || selectedRole})`;
+      }
     }
 
     function toggleTheme() {
-      document.body.classList.toggle('light-mode');
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'light' ? '' : 'light');
     }
 
-    function suggestPassword() {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-      let suggested = "";
-      for (let i = 0; i < 12; i++) {
-        suggested += chars.charAt(Math.floor(Math.random() * chars.length));
+    function executeFinalSignUp() {
+      if (selectedRole === 'Teacher' && !selectedUniversity) return;
+      currentUser = { ...tempSignupData };
+      if (currentUser.role === 'Teacher') {
+        currentUser.university = selectedUniversity;
       }
-      const passInput = document.getElementById('regPassword');
-      passInput.type = "text";
-      passInput.value = suggested;
-      showNotice("Strong Password Generated", `Your suggested password is:\n\n${suggested}\n\nIt has been automatically set in the password field.`, "💡");
+      localStorage.setItem(`studySuite_user_${currentUser.email}`, JSON.stringify(currentUser));
+      sessionStorage.setItem('studySuite_session', JSON.stringify(currentUser));
+      if (currentUser.role === 'Teacher' && !localStorage.getItem(`studySuite_classes_${currentUser.email}`)) {
+        localStorage.setItem(`studySuite_classes_${currentUser.email}`, JSON.stringify([]));
+      }
+      if (currentUser.role === 'Teacher') {
+        goToTeacherDashboard();
+      } else {
+        goToStudentDashboard();
+      }
     }
 
-    async function handleSignup() {
-      const fullname = document.getElementById('regName').value.trim();
-      const course = document.getElementById('regCourse').value;
-      const year = document.getElementById('regYear').value;
-      const email = document.getElementById('regEmail').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
-
-      if (!fullname || !course || !email || !password) {
-        showNotice("Validation Error", "Please fill in all required fields including your Course/Major.", "⚠️");
-        return;
-      }
-
-      if (password.length < 8 || password.length > 20) {
-        showNotice("Password Error", "Password must be between 8 and 20 characters long.", "⚠️");
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fullname, course, year, email, password })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          showNotice("Account Created", "Your account has been successfully created! You can now sign in.", "✅", () => {
-            showView('viewSignin');
-          });
+    function executeLogin() {
+      const email = document.getElementById('li-email').value.trim();
+      let savedUser = JSON.parse(localStorage.getItem(`studySuite_user_${email}`));
+      if (!savedUser || !savedUser.role) {
+        showNotice("No complete account found.", () => { openSignupStep1(); }, true);
+      } else {
+        currentUser = savedUser;
+        sessionStorage.setItem('studySuite_session', JSON.stringify(currentUser));
+        if (currentUser.role === 'Teacher') {
+          goToTeacherDashboard();
         } else {
-          showNotice("Registration Failed", data.error || "An error occurred during sign up.", "❌");
+          goToStudentDashboard();
         }
-      } catch (err) {
-        showNotice("Server Error", "Unable to connect to the backend server.", "❌");
       }
     }
 
-    async function handleSignin() {
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
-
-      if (!email || !password) {
-        showNotice("Input Required", "Please enter both Email Address and Password.", "⚠️");
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/auth/signin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          activeUser = data.user;
-          launchDashboard();
-        } else {
-          showNotice("Sign In Failed", data.error || "Invalid login credentials.", "❌");
-        }
-      } catch (err) {
-        showNotice("Server Error", "Unable to connect to the backend server.", "❌");
+    function goToDashboard() {
+      if (currentUser && currentUser.role === 'Student') {
+        goToStudentDashboard();
+      } else {
+        goToTeacherDashboard();
       }
     }
 
-    function launchDashboard() {
-      document.getElementById('userName').innerText = activeUser ? activeUser.fullname : 'Student';
-      document.getElementById('userCourseTag').innerText = activeUser ? `${activeUser.course || ''} (${activeUser.year || ''})` : '';
-      showView('main-system');
-      loadSubjects();
-      loadActivities();
+    function goToTeacherDashboard() {
+      switchScreen('teacherDashboard');
+      const cleanSchoolName = currentUser.university ? currentUser.university.split('–')[0].trim() : 'University';
+      document.getElementById('teacherSchoolHeaderDisplay').innerText = `School: ${cleanSchoolName}`;
+      renderTeacherClassesGrid();
     }
 
-    // PROFILE SETTINGS MODAL LOGIC
+    function goToStudentDashboard() {
+      switchScreen('studentDashboard');
+      document.getElementById('studentSchoolSubtitle').innerText = `Enrolled classes and assigned tasks.`;
+      renderStudentClassesGrid();
+    }
+
     function openProfileSettings() {
-      if (!activeUser) return;
-      document.getElementById('settingsName').value = activeUser.fullname || '';
-      document.getElementById('settingsCourse').value = activeUser.course || 'BSCS (Computer Science)';
-      document.getElementById('settingsYear').value = activeUser.year || '1st Year';
-      document.getElementById('profileModal').style.display = 'flex';
-    }
-
-    function closeProfileSettings() {
-      document.getElementById('profileModal').style.display = 'none';
-    }
-
-    async function saveProfileSettings() {
-      const fullname = document.getElementById('settingsName').value.trim();
-      const course = document.getElementById('settingsCourse').value;
-      const year = document.getElementById('settingsYear').value;
-
-      if (!fullname) {
-        showNotice("Validation Error", "Full Name cannot be empty.", "⚠️");
-        return;
+      if (!currentUser) return;
+      document.getElementById('pf-firstname').value = currentUser.firstname || '';
+      document.getElementById('pf-lastname').value = currentUser.lastname || '';
+      document.getElementById('pf-email').value = currentUser.email || '';
+      const uniContainer = document.getElementById('pfUniversityContainer');
+      if (currentUser.role === 'Student') {
+        uniContainer.style.display = 'none';
+      } else {
+        uniContainer.style.display = 'block';
+        document.getElementById('pf-university').value = currentUser.university || '';
       }
-
-      try {
-        const res = await fetch('/api/user/profile', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: activeUser.email, fullname, course, year, profileCompleted: 1 })
-        });
-        if (res.ok) {
-          activeUser.fullname = fullname;
-          activeUser.course = course;
-          activeUser.year = year;
-          launchDashboard();
-          closeProfileSettings();
-          showNotice("Success", "Profile details updated successfully!", "✅");
-        } else {
-          showNotice("Error", "Failed to update profile.", "❌");
-        }
-      } catch (err) {
-        showNotice("Server Error", "Unable to connect to server.", "❌");
-      }
+      switchScreen('profileSettingsView');
     }
 
-    function confirmDeleteAccount() {
-      showConfirm("Delete Account", "Are you sure you want to delete your account? All subjects and activities will be permanently erased.", async () => {
-        try {
-          const res = await fetch(`/api/user/${encodeURIComponent(activeUser.email)}`, {
-            method: 'DELETE'
-          });
-          if (res.ok) {
-            closeProfileSettings();
-            showNotice("Account Deleted", "Your account has been deleted permanently.", "🗑️", () => {
-              activeUser = null;
-              globalActivities = [];
-              showView('viewGreeting');
-            });
-          } else {
-            showNotice("Error", "Failed to delete account.", "❌");
+    function executeUpdateProfile() {
+      currentUser.firstname = document.getElementById('pf-firstname').value.trim();
+      currentUser.lastname = document.getElementById('pf-lastname').value.trim();
+      localStorage.setItem(`studySuite_user_${currentUser.email}`, JSON.stringify(currentUser));
+      sessionStorage.setItem('studySuite_session', JSON.stringify(currentUser));
+      showNotice("Profile successfully updated!", () => { goToDashboard(); });
+    }
+
+    function executeDeleteAccount() {
+      if (!currentUser || !currentUser.email) return;
+      localStorage.removeItem(`studySuite_user_${currentUser.email}`);
+      localStorage.removeItem(`studySuite_classes_${currentUser.email}`);
+      localStorage.removeItem(`studySuite_enrolled_${currentUser.email}`);
+      sessionStorage.removeItem('studySuite_session');
+      currentUser = null;
+      showNotice("Account successfully deleted.", () => { switchScreen('greetingScreen'); });
+    }
+
+    function getSchoolNickname(name) {
+      if (!name) return 'SCH';
+      const match = name.match(/\(([^)]+)\)/);
+      if (match && match[1]) return match[1].trim().toUpperCase();
+      return name.split('–')[0].trim().substring(0, 4).toUpperCase();
+    }
+
+    function generateUniqueClassCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 9; i++) {
+        if (i === 3 || i === 6) code += '-';
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      let allKeys = Object.keys(localStorage);
+      for (let key of allKeys) {
+        if (key.startsWith('studySuite_classes_')) {
+          let clList = JSON.parse(localStorage.getItem(key)) || [];
+          if (clList.some(c => c.classCode === code)) {
+            return generateUniqueClassCode();
           }
-        } catch (e) {
-          showNotice("Server Error", "Unable to connect to server.", "❌");
         }
+      }
+      return code;
+    }
+
+    function getTeacherClasses() {
+      if (!currentUser || !currentUser.email) return [];
+      return JSON.parse(localStorage.getItem(`studySuite_classes_${currentUser.email.trim()}`)) || [];
+    }
+
+    function saveTeacherClasses(classes) {
+      if (!currentUser || !currentUser.email) return;
+      localStorage.setItem(`studySuite_classes_${currentUser.email.trim()}`, JSON.stringify(classes));
+    }
+
+    function executeCreateClass() {
+      const className = document.getElementById('className').value.trim().toUpperCase();
+      const year = document.getElementById('classYear').value;
+      const subject = document.getElementById('classSubject').value.trim();
+      if (!className || !year || !subject) return;
+
+      const schoolBadge = getSchoolNickname(currentUser.university);
+      const classCode = generateUniqueClassCode();
+      const newClass = { id: Date.now(), className, year, subject, schoolBadge, classCode, professorName: `${currentUser.firstname} ${currentUser.lastname}`, professorEmail: currentUser.email };
+      
+      let teacherClasses = getTeacherClasses();
+      teacherClasses.push(newClass);
+      saveTeacherClasses(teacherClasses);
+
+      renderTeacherClassesGrid();
+      activeClassId = newClass.id;
+      showNotice(`Class <b>${className}</b> successfully created.<br>Class Code: <b>${classCode}</b>`, () => { openClassView(activeClassId); });
+    }
+
+    function openEditClassForm() {
+      let teacherClasses = getTeacherClasses();
+      const target = teacherClasses.find(c => c.id === activeClassId);
+      if (!target) return;
+      document.getElementById('editClassName').value = target.className || '';
+      document.getElementById('editClassYear').value = target.year || '1st Year';
+      document.getElementById('editClassSubject').value = target.subject || '';
+      switchScreen('editClassView');
+    }
+
+    function executeEditClass() {
+      let teacherClasses = getTeacherClasses();
+      const index = teacherClasses.findIndex(c => c.id === activeClassId);
+      if (index !== -1) {
+        teacherClasses[index].className = document.getElementById('editClassName').value.trim().toUpperCase();
+        teacherClasses[index].year = document.getElementById('editClassYear').value;
+        teacherClasses[index].subject = document.getElementById('editClassSubject').value.trim();
+        saveTeacherClasses(teacherClasses);
+      }
+      showNotice("Class details successfully updated!", () => { openClassView(activeClassId); });
+    }
+
+    function executeDeleteClass() {
+      if (!activeClassId) return;
+      let teacherClasses = getTeacherClasses().filter(c => c.id !== activeClassId);
+      saveTeacherClasses(teacherClasses);
+      showNotice("Class successfully deleted.", () => { goToDashboard(); });
+    }
+
+    function renderTeacherClassesGrid() {
+      const grid = document.getElementById('classesGridContainer');
+      if (!grid) return;
+      let teacherClasses = getTeacherClasses();
+      grid.innerHTML = `<div class="create-class-card" onclick="openCreateClassForm()"><div style="font-size: 32px; margin-bottom: 8px;">+</div><h4 style="font-size: 16px;">Create class</h4></div>`;
+      teacherClasses.forEach(c => {
+        grid.innerHTML += `<div class="class-card" onclick="openClassView(${c.id})"><div class="school-badge">${c.schoolBadge}</div><h3 style="color: var(--primary); margin-bottom: 4px;">${c.className}</h3><p style="font-size: 13px; color: var(--text-dim); margin-bottom: 4px;">${c.year || 'N/A'}</p><p style="font-size: 12px; color: var(--text-dim);">${c.subject}</p><div style="margin-top: 10px; font-size: 11px; color: var(--primary); font-weight: bold;">Code: ${c.classCode || 'N/A'}</div></div>`;
       });
     }
 
-    async function handleForgotReq() {
-      const email = document.getElementById('forgotEmail').value.trim();
-      if (!email) {
-        showNotice("Input Required", "Please enter your registered email address.", "⚠️");
-        return;
+    function openCreateClassForm() { switchScreen('createClassView'); }
+
+    function openJoinClassModal() {
+      document.getElementById('joinStep1').classList.remove('hidden');
+      document.getElementById('joinStep2').classList.add('hidden');
+      document.getElementById('joinClassCodeInput').value = '';
+      if (currentUser) {
+        document.getElementById('joinStudentName').value = `${currentUser.firstname || ''} ${currentUser.lastname || ''}`.trim();
       }
-      try {
-        const res = await fetch('/api/auth/forgot-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          targetEmailForOtp = email;
-          showNotice("OTP Sent", "An OTP verification code has been sent. Please check your server terminal console.", "📩", () => {
-            showView('viewForgotReset');
-          });
-        } else {
-          showNotice("Error", data.error || "Failed to process forgot password request.", "❌");
-        }
-      } catch (err) {
-        showNotice("Server Error", "Unable to connect to server.", "❌");
-      }
+      document.getElementById('joinClassModal').classList.remove('hidden');
     }
 
-    async function handleForgotReset() {
-      const otp = document.getElementById('otpCode').value.trim();
-      const newPassword = document.getElementById('newPassword').value.trim();
+    function closeJoinClassModal() {
+      document.getElementById('joinClassModal').classList.add('hidden');
+      tempJoinClassObj = null;
+    }
 
-      if (!otp || !newPassword) {
-        showNotice("Input Required", "Please enter both the OTP code and new password.", "⚠️");
+    function verifyClassCode() {
+      const name = document.getElementById('joinStudentName').value.trim();
+      const course = document.getElementById('joinStudentCourseDropdown').value;
+      const yearLvl = document.getElementById('joinStudentYearLvl').value;
+      const code = document.getElementById('joinClassCodeInput').value.trim().toUpperCase();
+
+      if (!name || !code) {
+        showNotice("Please fill in all required fields and enter a class code.", null, true);
         return;
       }
 
-      try {
-        const res = await fetch('/api/auth/reset-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: targetEmailForOtp, otp, newPassword })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          showNotice("Password Reset Success", "Your password has been updated! You can now sign in.", "✅", () => {
-            showView('viewSignin');
-          });
-        } else {
-          showNotice("Reset Failed", data.error || "Invalid OTP code or request expired.", "❌");
-        }
-      } catch (err) {
-        showNotice("Server Error", "Unable to connect to server.", "❌");
-      }
-    }
-
-    function confirmLogout() {
-      showConfirm("Logout", "Are you sure you want to log out of StudySuite?", () => {
-        activeUser = null;
-        globalActivities = [];
-        
-        const activityList = document.getElementById('activityList');
-        const subjectList = document.getElementById('subjectList');
-        const calendarCells = document.getElementById('calendarCells');
-        if (activityList) activityList.innerHTML = '';
-        if (subjectList) subjectList.innerHTML = '';
-        if (calendarCells) calendarCells.innerHTML = '';
-
-        showView('viewGreeting');
-      });
-    }
-
-    function setFilter(filterType) {
-      currentFilter = filterType;
-      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
-      if (filterType === 'ALL') document.getElementById('cardAll')?.classList.add('active-filter');
-      if (filterType === 'Pending') document.getElementById('cardPending')?.classList.add('active-filter');
-      if (filterType === 'In Progress') document.getElementById('cardProgress')?.classList.add('active-filter');
-      if (filterType === 'Completed') document.getElementById('cardCompleted')?.classList.add('active-filter');
-      renderActivityList();
-    }
-
-    // SUBJECTS (ISOLATED PER USER)
-    async function loadSubjects() {
-      if (!activeUser) return;
-      try {
-        const res = await fetch(`/api/subjects?email=${encodeURIComponent(activeUser.email)}`);
-        const subjects = await res.json();
-        
-        const select = document.getElementById('actSubject');
-        const container = document.getElementById('subjectList');
-        
-        const currentValue = select ? select.value : '';
-        if (select) select.innerHTML = '<option value="General">General</option>';
-        if (container) container.innerHTML = subjects.length === 0 ? '<p style="font-size:12px; color:var(--text-dim);">No subjects added.</p>' : '';
-
-        subjects.forEach(sub => {
-          if (select) {
-            const option = document.createElement('option');
-            option.value = sub.code;
-            option.textContent = `${sub.code}: ${sub.name}`;
-            select.appendChild(option);
+      let targetClass = null;
+      let foundTeacherEmail = '';
+      let allKeys = Object.keys(localStorage);
+      for (let key of allKeys) {
+        if (key.startsWith('studySuite_classes_')) {
+          let clList = JSON.parse(localStorage.getItem(key)) || [];
+          let found = clList.find(c => c.classCode === code);
+          if (found) {
+            targetClass = found;
+            foundTeacherEmail = key.replace('studySuite_classes_', '');
+            break;
           }
-          if (container) {
-            container.innerHTML += `
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding:8px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px;">
-                <span><strong>${sub.code}</strong>: ${sub.name}</span>
-                <button class="btn-del" onclick="confirmDeleteSubject(${sub.id})">Delete</button>
-              </div>
-            `;
-          }
-        });
-        if (select && currentValue) select.value = currentValue;
-      } catch (err) {
-        console.error("Error loading subjects:", err);
-      }
-    }
-
-    async function addSubject() {
-      const codeInput = document.getElementById('subCode');
-      const nameInput = document.getElementById('subName');
-      const code = codeInput.value.trim();
-      const name = nameInput.value.trim();
-
-      if (!code || !name) {
-        showNotice("Input Required", "Please enter both Subject Code and Title.", "⚠️");
-        return;
-      }
-
-      const res = await fetch('/api/subjects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: activeUser.email, code, name })
-      });
-
-      if (res.ok) {
-        codeInput.value = '';
-        nameInput.value = '';
-        await loadSubjects();
-      }
-    }
-
-    function confirmDeleteSubject(id) {
-      showConfirm("Delete Subject", "Are you sure you want to delete this subject?", async () => {
-        await fetch(`/api/subjects/${id}`, { method: 'DELETE' });
-        await loadSubjects();
-      });
-    }
-
-    // LOAD ACTIVITIES (ISOLATED PER USER)
-    async function loadActivities() {
-      if (!activeUser) return;
-      try {
-        const res = await fetch(`/api/activities?email=${encodeURIComponent(activeUser.email)}`);
-        if (!res.ok) throw new Error("Failed to load");
-        
-        globalActivities = await res.json();
-
-        let pending = 0, progress = 0, completed = 0;
-        globalActivities.forEach(act => {
-          if (act.status === 'Pending') pending++;
-          if (act.status === 'In Progress') progress++;
-          if (act.status === 'Completed') completed++;
-        });
-
-        const totalEl = document.getElementById('statTotal');
-        const pendingEl = document.getElementById('statPending');
-        const progressEl = document.getElementById('statProgress');
-        const completedEl = document.getElementById('statCompleted');
-
-        if (totalEl) totalEl.innerText = globalActivities.length;
-        if (pendingEl) pendingEl.innerText = pending;
-        if (progressEl) progressEl.innerText = progress;
-        if (completedEl) completedEl.innerText = completed;
-
-        renderActivityList();
-        renderCalendar();
-      } catch (err) {
-        console.error("Error loading activities:", err);
-      }
-    }
-
-    async function addActivity() {
-      const titleInput = document.getElementById('actTitle');
-      const title = titleInput.value.trim();
-      const subject = document.getElementById('actSubject').value;
-      const priority = document.getElementById('actPriority').value;
-      const due_date = document.getElementById('actDate').value;
-      const due_time = document.getElementById('actTime').value;
-      const notes = document.getElementById('actNotes').value.trim();
-
-      if (!title) {
-        showNotice("Input Required", "Please enter an Activity Title.", "⚠️");
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/activities', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: activeUser.email, title, subject, due_date, due_time, priority, notes })
-        });
-        if (res.ok) {
-          titleInput.value = '';
-          document.getElementById('actNotes').value = '';
-          document.getElementById('actDate').value = '';
-          document.getElementById('actTime').value = '';
-          await loadActivities();
         }
-      } catch (err) {
-        showNotice("Error", "Failed to save activity.", "❌");
       }
+
+      if (!targetClass) {
+        showNotice("Invalid class code. Please check the code and try again.", null, true);
+        return;
+      }
+
+      let enrolledList = JSON.parse(localStorage.getItem(`studySuite_enrolled_${currentUser.email}`)) || [];
+      if (enrolledList.some(e => e.classId === targetClass.id)) {
+        showNotice("You are already enrolled in this class.", null, true);
+        return;
+      }
+
+      tempJoinClassObj = {
+        ...targetClass,
+        teacherEmail: foundTeacherEmail,
+        studentInfo: { name, course, yearLvl }
+      };
+
+      document.getElementById('previewClassName').innerText = targetClass.className;
+      document.getElementById('previewClassMeta').innerText = `${targetClass.year} • ${targetClass.subject}`;
+      document.getElementById('previewClassDesc').innerText = targetClass.description || 'No description provided for this class.';
+      document.getElementById('previewClassProf').innerText = targetClass.professorName || 'Instructor';
+
+      document.getElementById('joinStep1').classList.add('hidden');
+      document.getElementById('joinStep2').classList.remove('hidden');
     }
 
-    async function updateStatus(id, status) {
-      await fetch(`/api/activities/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+    function backToJoinStep1() {
+      document.getElementById('joinStep2').classList.add('hidden');
+      document.getElementById('joinStep1').classList.remove('hidden');
+    }
+
+    function confirmJoinClass() {
+      if (!tempJoinClassObj) return;
+      let enrolledList = JSON.parse(localStorage.getItem(`studySuite_enrolled_${currentUser.email}`)) || [];
+      enrolledList.push(tempJoinClassObj);
+      localStorage.setItem(`studySuite_enrolled_${currentUser.email}`, JSON.stringify(enrolledList));
+
+      let rosterKey = `studySuite_roster_${tempJoinClassObj.teacherEmail}_${tempJoinClassObj.id}`;
+      let classRoster = JSON.parse(localStorage.getItem(rosterKey)) || [];
+      if (!classRoster.some(s => s.email === currentUser.email)) {
+        classRoster.push({
+          email: currentUser.email,
+          name: tempJoinClassObj.studentInfo.name,
+          course: tempJoinClassObj.studentInfo.course,
+          yearLvl: tempJoinClassObj.studentInfo.yearLvl,
+          joinedDate: new Date().toLocaleString()
+        });
+        localStorage.setItem(rosterKey, JSON.stringify(classRoster));
+      }
+
+      closeJoinClassModal();
+      renderStudentClassesGrid();
+      showNotice("You have successfully joined the class.");
+    }
+
+    function getStudentEnrolledClasses() {
+      if (!currentUser || !currentUser.email) return [];
+      return JSON.parse(localStorage.getItem(`studySuite_enrolled_${currentUser.email}`)) || [];
+    }
+
+    function renderStudentClassesGrid() {
+      const grid = document.getElementById('studentClassesGridContainer');
+      if (!grid) return;
+      let enrolled = getStudentEnrolledClasses();
+      grid.innerHTML = enrolled.length === 0 ? '<p style="font-size: 13px; color: var(--text-dim);">No enrolled classes yet. Click "+ Join Class" to get started.</p>' : '';
+      enrolled.forEach(c => {
+        grid.innerHTML += `<div class="class-card" onclick="openStudentClassView(${c.id}, '${c.teacherEmail}')"><div class="school-badge">${c.schoolBadge}</div><h3 style="color: var(--primary); margin-bottom: 4px;">${c.className}</h3><p style="font-size: 13px; color: var(--text-dim); margin-bottom: 4px;">${c.year || 'N/A'}</p><p style="font-size: 12px; color: var(--text-dim);">${c.subject}</p><div style="margin-top: 10px; font-size: 11px; color: var(--text-dim);">Prof: ${c.professorName}</div></div>`;
       });
-      await loadActivities();
     }
 
-    function confirmDeleteActivity(id) {
-      showConfirm("Delete Activity", "Are you sure you want to delete this activity?", async () => {
-        await fetch(`/api/activities/${id}`, { method: 'DELETE' });
-        await loadActivities();
-      });
+    function openStudentClassView(classId, teacherEmail) {
+      activeClassId = classId;
+      let teacherClasses = JSON.parse(localStorage.getItem(`studySuite_classes_${teacherEmail}`)) || [];
+      const target = teacherClasses.find(c => c.id === classId);
+      if (!target) {
+        showNotice("Class no longer exists.", null, true);
+        return;
+      }
+
+      document.getElementById('currentClassNameDisplay').innerText = target.className;
+      document.getElementById('classCodeBadgeDisplay').innerText = `Code: ${target.classCode}`;
+      document.getElementById('currentClassMetaDisplay').innerText = `${target.year ? target.year + ' • ' : ''}${target.subject} | Professor: ${target.professorName}`;
+      
+      document.getElementById('teacherClassActions').style.display = 'none';
+      document.getElementById('teacherAddLessonBox').style.display = 'none';
+      document.getElementById('teacherAddTaskBox').style.display = 'none';
+      document.getElementById('teacherBulletinInputBox').style.display = 'none';
+      document.getElementById('rosterNavTabBtn').style.display = 'none';
+
+      switchScreen('singleClassView');
+      renderStudentLessons(teacherEmail);
+      renderStudentClassItems(teacherEmail);
     }
 
-    function renderActivityList() {
-      const container = document.getElementById('activityList');
+    function isItemUnlocked(item) {
+      let now = new Date();
+      if (item.openDate) {
+        let openTime = new Date(item.openDate);
+        if (now < openTime) return false;
+      }
+      return true;
+    }
+
+    function renderStudentLessons(teacherEmail) {
+      const container = document.getElementById('lessonsListContainer');
       if (!container) return;
-
-      const filtered = globalActivities.filter(a => currentFilter === 'ALL' || a.status === currentFilter);
-      const listHeader = document.getElementById('listHeader');
-      if (listHeader) listHeader.innerText = `📌 Activity List (${currentFilter})`;
-
-      container.innerHTML = filtered.length === 0 ? '<p style="font-size:12px; color:var(--text-dim); margin-top:10px; text-align:center; padding:20px;">No activities found for this filter.</p>' : '';
-
-      filtered.forEach(act => {
-        let formattedTime = '';
-        if (act.due_time) {
-          const [h, m] = act.due_time.split(':');
-          const hour = parseInt(h);
-          const ampm = hour >= 12 ? 'PM' : 'AM';
-          const formattedHour = hour % 12 || 12;
-          formattedTime = ` @ ${formattedHour}:${m} ${ampm}`;
-        }
-
+      let map = JSON.parse(localStorage.getItem(`studySuite_lessons_${teacherEmail}`)) || {};
+      let lessons = map[activeClassId] || [];
+      
+      container.innerHTML = lessons.length === 0 ? '<p style="font-size: 13px; color: var(--text-dim); text-align: center; padding: 20px;">No lessons available yet.</p>' : '';
+      
+      lessons.forEach((l, idx) => {
+        let unlocked = isItemUnlocked(l);
         container.innerHTML += `
-          <div class="activity-card">
-            <div class="activity-header">
+          <div class="topic-card">
+            <div class="topic-header">
+              <div><strong>Topic ${idx + 1}: ${l.title}</strong></div>
+              <span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; background: ${unlocked ? 'rgba(34, 197, 94, 0.2); color: var(--success)' : 'rgba(239, 68, 68, 0.2); color: var(--danger)'}">
+                ${unlocked ? 'Open / Available' : '🔒 Locked / Not Yet Accessible'}
+              </span>
+            </div>
+            <div class="topic-body">
+              <div>📝 ${l.desc || 'No instructions provided.'}</div>
+              ${l.fileName ? `<div style="margin-top: 6px; color: var(--primary);">📎 Attached Material: <strong>${l.fileName}</strong></div>` : ''}
+              ${l.openDate ? `<div style="margin-top: 4px; font-size: 11px; color: var(--text-dim);">Opens on: ${l.openDate}</div>` : ''}
+              
+              ${unlocked ? `<button onclick="showNotice('Lesson marked as completed!')" style="margin-top: 10px; padding: 6px 12px; font-size: 12px;">Mark as Complete</button>` : `<div style="margin-top: 10px; font-size: 12px; color: var(--danger); font-weight: bold;">This lesson is currently locked and cannot be accessed yet.</div>`}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function renderStudentClassItems(teacherEmail) {
+      const ongoingContainer = document.getElementById('ongoingTasksContainer');
+      const completedContainer = document.getElementById('completedTasksContainer');
+      if (!ongoingContainer || !completedContainer) return;
+
+      let map = JSON.parse(localStorage.getItem(`studySuite_classItems_${teacherEmail}`)) || {};
+      let items = map[activeClassId] || [];
+
+      let studentSubmissions = JSON.parse(localStorage.getItem(`studySuite_submissions_${teacherEmail}_${activeClassId}`)) || {};
+      let mySubmissions = studentSubmissions[currentUser.email] || [];
+
+      let ongoingItems = items.filter(item => !mySubmissions.some(sub => sub.taskId === item.id));
+      let completedItems = items.filter(item => mySubmissions.some(sub => sub.taskId === item.id));
+
+      ongoingContainer.innerHTML = ongoingItems.length === 0 ? '<p style="font-size: 13px; color: var(--text-dim);">No ongoing tasks.</p>' : '';
+      ongoingItems.forEach((item) => {
+        let unlocked = isItemUnlocked(item);
+        ongoingContainer.innerHTML += `
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
               <div>
-                <strong>${act.title}</strong>
-                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
-                  Subject: ${act.subject} | Due: <strong>${act.due_date || 'No Date'} ${formattedTime}</strong>
+                <strong>[${item.type}] ${item.title}</strong>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">Opens: ${item.openDate || 'Immediate'} | Deadline: ${item.dueDate || 'None'}</div>
+                <div style="font-size: 12px; color: var(--text); margin-top: 6px;">${item.desc || ''}</div>
+              </div>
+              ${unlocked ? `<button onclick="openStudentSubmitModal(${item.id}, '${teacherEmail}')" style="padding: 6px 12px; font-size: 12px;">Submit Work</button>` : `<span style="font-size: 11px; color: var(--danger); font-weight: bold;">🔒 Locked</span>`}
+            </div>
+          </div>
+        `;
+      });
+
+      completedContainer.innerHTML = completedItems.length === 0 ? '<p style="font-size: 13px; color: var(--text-dim);">No completed tasks yet.</p>' : '';
+      completedItems.forEach((item) => {
+        let subRecord = mySubmissions.find(sub => sub.taskId === item.id);
+        completedContainer.innerHTML += `
+          <div style="background: rgba(34, 197, 94, 0.05); border: 1px solid var(--success); border-radius: 8px; padding: 15px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <strong style="color: var(--success);">[${item.type}] ${item.title}</strong>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">Status: Submitted & Completed on ${subRecord ? subRecord.date : ''}</div>
+                ${subRecord && subRecord.fileName ? `<div style="font-size: 12px; color: var(--primary); margin-top: 4px;">📎 Submitted File: <strong>${subRecord.fileName}</strong></div>` : ''}
+              </div>
+              <span style="font-size: 12px; color: var(--success); font-weight: bold;">✔ Done</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function openStudentSubmitModal(taskId, teacherEmail) {
+      document.getElementById('submitTaskId').value = taskId;
+      document.getElementById('submitTaskTeacherEmail').value = teacherEmail;
+      document.getElementById('studentSubmissionFile').value = '';
+      document.getElementById('studentSubmissionNotes').value = '';
+      document.getElementById('studentSubmitModal').classList.remove('hidden');
+    }
+
+    function closeStudentSubmitModal() {
+      document.getElementById('studentSubmitModal').classList.add('hidden');
+    }
+
+    function executeStudentSubmit() {
+      const taskId = Number(document.getElementById('submitTaskId').value);
+      const teacherEmail = document.getElementById('submitTaskTeacherEmail').value;
+      const fileInput = document.getElementById('studentSubmissionFile');
+      const notes = document.getElementById('studentSubmissionNotes').value.trim();
+
+      let fileName = 'No file attached';
+      if (fileInput.files && fileInput.files[0]) {
+        fileName = fileInput.files[0].name;
+      }
+
+      let subKey = `studySuite_submissions_${teacherEmail}_${activeClassId}`;
+      let allSubmissions = JSON.parse(localStorage.getItem(subKey)) || {};
+      if (!allSubmissions[currentUser.email]) allSubmissions[currentUser.email] = [];
+
+      allSubmissions[currentUser.email].push({
+        taskId,
+        fileName,
+        notes,
+        studentName: `${currentUser.firstname} ${currentUser.lastname}`,
+        date: new Date().toLocaleString()
+      });
+
+      localStorage.setItem(subKey, JSON.stringify(allSubmissions));
+      closeStudentSubmitModal();
+      showNotice("Your activity and work have been successfully submitted to your professor!");
+      renderStudentClassItems(teacherEmail);
+    }
+
+    function openClassView(id) {
+      activeClassId = id;
+      let teacherClasses = getTeacherClasses();
+      const target = teacherClasses.find(c => c.id === id);
+      if (!target) return;
+      document.getElementById('currentClassNameDisplay').innerText = target.className;
+      document.getElementById('classCodeBadgeDisplay').innerText = `Code: ${target.classCode}`;
+      document.getElementById('currentClassMetaDisplay').innerText = `${target.year ? target.year + ' • ' : ''}${target.subject}`;
+      
+      document.getElementById('teacherClassActions').style.display = 'flex';
+      document.getElementById('teacherAddLessonBox').style.display = 'block';
+      document.getElementById('teacherAddTaskBox').style.display = 'block';
+      document.getElementById('teacherBulletinInputBox').style.display = 'block';
+      document.getElementById('rosterNavTabBtn').style.display = 'block';
+
+      switchScreen('singleClassView');
+      renderLessons();
+      renderClassItems();
+      populateActivitySelector();
+      renderRosterTable();
+    }
+
+    function switchClassMainTab(tabId) {
+      document.querySelectorAll('.class-main-tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.class-nav-tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.remove('hidden');
+      event.target.classList.add('active');
+    }
+
+    function switchCcSubTab(subId, btnEl) {
+      document.querySelectorAll('.cc-sub-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.cc-sidebar-btn').forEach(el => el.classList.remove('active'));
+      if (subId === 'courseSub') {
+        document.getElementById('courseSubTabContent').classList.remove('hidden');
+      } else {
+        document.getElementById('teacherSubTabContent').classList.remove('hidden');
+      }
+      btnEl.classList.add('active');
+    }
+
+    function getLessonsMap() {
+      return JSON.parse(localStorage.getItem(`studySuite_lessons_${currentUser.email}`)) || {};
+    }
+    function saveLessonsMap(map) {
+      localStorage.setItem(`studySuite_lessons_${currentUser.email}`, JSON.stringify(map));
+    }
+    
+    function toggleLessonUnlockDateInput() {
+      const lockType = document.getElementById('lessonLockType').value;
+      const dateWrapper = document.getElementById('lessonUnlockDateWrapper');
+      if (lockType === 'deadline') {
+        dateWrapper.classList.remove('hidden');
+      } else {
+        dateWrapper.classList.add('hidden');
+      }
+    }
+
+    function executeAddLesson() {
+      const title = document.getElementById('lessonTitleInput').value.trim();
+      const desc = document.getElementById('lessonDescInput').value.trim();
+      const lockType = document.getElementById('lessonLockType').value;
+      const unlockDate = document.getElementById('lessonUnlockDate').value;
+      const fileInput = document.getElementById('lessonFileInput');
+      if (!title) return;
+
+      let fileName = '';
+      if (fileInput.files && fileInput.files[0]) {
+        fileName = fileInput.files[0].name;
+      }
+
+      let map = getLessonsMap();
+      if (!map[activeClassId]) map[activeClassId] = [];
+      map[activeClassId].push({ id: Date.now(), title, desc, fileName, visible: true, lockType, openDate: unlockDate, dueDate: unlockDate });
+      saveLessonsMap(map);
+
+      document.getElementById('addLessonForm').reset();
+      document.getElementById('lessonUnlockDateWrapper').classList.add('hidden');
+      renderLessons();
+      showNotice("Lesson successfully published!");
+    }
+
+    function renderLessons() {
+      const container = document.getElementById('lessonsListContainer');
+      if (!container) return;
+      let map = getLessonsMap();
+      let lessons = map[activeClassId] || [];
+      container.innerHTML = lessons.length === 0 ? '<p style="font-size: 13px; color: var(--text-dim); text-align: center; padding: 20px;">No lessons added for this course yet.</p>' : '';
+      lessons.forEach((l, idx) => {
+        container.innerHTML += `
+          <div class="topic-card">
+            <div class="topic-header">
+              <div><strong>Topic ${idx + 1}: ${l.title}</strong></div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(34, 197, 94, 0.2); color: var(--success)">Active</span>
+                <button onclick="openEditLessonModal(${l.id})" style="padding: 4px 8px; font-size: 11px; background: rgba(255,255,255,0.1)">Edit</button>
+                <button onclick="deleteLesson(${l.id})" style="padding: 4px 8px; font-size: 11px; background: var(--danger)">Delete</button>
+              </div>
+            </div>
+            <div class="topic-body">
+              <div>📝 ${l.desc || 'No instructions provided.'}</div>
+              ${l.fileName ? `<div style="margin-top: 6px; color: var(--primary);">📎 Attached file: <strong>${l.fileName}</strong></div>` : ''}
+              ${l.openDate ? `<div style="margin-top: 4px; font-size: 11px; color: var(--text-dim);">Opens on: ${l.openDate}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function deleteLesson(id) {
+      let map = getLessonsMap();
+      map[activeClassId] = (map[activeClassId] || []).filter(x => x.id !== id);
+      saveLessonsMap(map);
+      renderLessons();
+    }
+
+    function openEditLessonModal(id) {
+      let map = getLessonsMap();
+      let lessons = map[activeClassId] || [];
+      let l = lessons.find(x => x.id === id);
+      if (!l) return;
+      document.getElementById('editLessonId').value = l.id;
+      document.getElementById('editLessonTitleInput').value = l.title;
+      document.getElementById('editLessonDescInput').value = l.desc || '';
+      document.getElementById('editLessonFileInput').value = '';
+      document.getElementById('editLessonModal').classList.remove('hidden');
+    }
+
+    function closeEditLessonModal() {
+      document.getElementById('editLessonModal').classList.add('hidden');
+    }
+
+    function saveEditedLesson() {
+      const id = Number(document.getElementById('editLessonId').value);
+      const title = document.getElementById('editLessonTitleInput').value.trim();
+      const desc = document.getElementById('editLessonDescInput').value.trim();
+      const fileInput = document.getElementById('editLessonFileInput');
+      if (!title) return;
+
+      let map = getLessonsMap();
+      let lessons = map[activeClassId] || [];
+      let l = lessons.find(x => x.id === id);
+      if (l) {
+        l.title = title;
+        l.desc = desc;
+        if (fileInput.files && fileInput.files[0]) {
+          l.fileName = fileInput.files[0].name;
+        }
+        saveLessonsMap(map);
+        closeEditLessonModal();
+        renderLessons();
+        showNotice("Lesson successfully updated!");
+      }
+    }
+
+    function getClassItemsMap() {
+      return JSON.parse(localStorage.getItem(`studySuite_classItems_${currentUser.email}`)) || {};
+    }
+    function saveClassItemsMap(map) {
+      localStorage.setItem(`studySuite_classItems_${currentUser.email}`, JSON.stringify(map));
+    }
+    function executeAddItemToClass() {
+      const title = document.getElementById('itemTitle').value.trim();
+      const type = document.getElementById('itemType').value;
+      const openDate = document.getElementById('itemOpenDate').value;
+      const dueDate = document.getElementById('itemDueDate').value;
+      const desc = document.getElementById('itemDesc').value.trim();
+      if (!title) return;
+
+      let map = getClassItemsMap();
+      if (!map[activeClassId]) map[activeClassId] = [];
+      map[activeClassId].push({ 
+        id: Date.now(), 
+        title, 
+        type, 
+        openDate, 
+        dueDate, 
+        desc, 
+        visible: true 
+      });
+      saveClassItemsMap(map);
+
+      document.getElementById('addItemFormElement').reset();
+      renderClassItems();
+      populateActivitySelector();
+      renderRosterTable();
+      showNotice("Task successfully published!");
+    }
+
+    function renderClassItems() {
+      const ongoingContainer = document.getElementById('ongoingTasksContainer');
+      let map = getClassItemsMap();
+      let items = map[activeClassId] || [];
+      
+      if (ongoingContainer) {
+        ongoingContainer.innerHTML = items.length === 0 ? '<p style="font-size: 13px; color: var(--text-dim);">No tasks published yet.</p>' : '';
+        items.forEach((item) => {
+          ongoingContainer.innerHTML += `
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <strong>[${item.type}] ${item.title}</strong>
+                  <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px;">Opens: ${item.openDate || 'Immediate'} | Deadline: ${item.dueDate || 'None'}</div>
+                  <div style="font-size: 12px; color: var(--text); margin-top: 6px;">${item.desc || ''}</div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button onclick="openEditTaskModal(${item.id})" style="background: rgba(255,255,255,0.1); padding: 4px 8px; font-size: 11px;">Edit</button>
+                  <button onclick="deleteTask(${item.id})" style="background: var(--danger); padding: 4px 8px; font-size: 11px;">Remove</button>
                 </div>
               </div>
-              <span class="priority-badge p-${act.priority}">${act.priority}</span>
             </div>
-
-            ${act.notes ? `<div class="notes-box">💡 ${act.notes}</div>` : ''}
-
-            <div class="action-row">
-              <div>
-                <label style="display:inline; margin-right:5px; font-size:11px;">Status:</label>
-                <select onchange="updateStatus(${act.id}, this.value)" style="width:auto; padding:4px 8px; font-size:12px;">
-                  <option value="Pending" ${act.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                  <option value="In Progress" ${act.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                  <option value="Completed" ${act.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                </select>
-              </div>
-              <button class="btn-del" onclick="confirmDeleteActivity(${act.id})">Delete</button>
-            </div>
-          </div>
-        `;
-      });
+          `;
+        });
+      }
     }
 
-    // CALENDAR FUNCTION WITH PADDED DATES
-    function renderCalendar() {
-      const calCells = document.getElementById('calendarCells');
-      if (!calCells) return;
-      calCells.innerHTML = '';
+    function openEditTaskModal(id) {
+      let map = getClassItemsMap();
+      let items = map[activeClassId] || [];
+      let item = items.find(x => x.id === id);
+      if (!item) return;
 
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      document.getElementById('editTaskId').value = item.id;
+      document.getElementById('editTaskTitle').value = item.title;
+      document.getElementById('editTaskType').value = item.type;
+      document.getElementById('editTaskOpenDate').value = item.openDate || '';
+      document.getElementById('editTaskDueDate').value = item.dueDate || '';
+      document.getElementById('editTaskDesc').value = item.desc || '';
+      document.getElementById('editTaskModal').classList.remove('hidden');
+    }
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const paddedMonth = String(month + 1).padStart(2, '0');
-        const paddedDay = String(day).padStart(2, '0');
-        const dateStr = `${year}-${paddedMonth}-${paddedDay}`;
-        
-        const dayTasks = globalActivities.filter(a => a.due_date === dateStr);
+    function closeEditTaskModal() {
+      document.getElementById('editTaskModal').classList.add('hidden');
+    }
 
-        let tooltipHTML = '';
-        if (dayTasks.length > 0) {
-          tooltipHTML = `<div class="cal-tooltip"><strong>Due Today:</strong><br>`;
-          dayTasks.forEach(t => {
-            tooltipHTML += `• ${t.title} (${t.due_time || 'No Time'})<br>`;
-          });
-          tooltipHTML += `</div>`;
-        }
+    function saveEditedTask() {
+      const id = Number(document.getElementById('editTaskId').value);
+      const title = document.getElementById('editTaskTitle').value.trim();
+      const type = document.getElementById('editTaskType').value;
+      const openDate = document.getElementById('editTaskOpenDate').value;
+      const dueDate = document.getElementById('editTaskDueDate').value;
+      const desc = document.getElementById('editTaskDesc').value.trim();
+      if (!title) return;
 
-        calCells.innerHTML += `
-          <div class="cal-cell ${dayTasks.length > 0 ? 'has-task' : ''}">
-            <strong>${day}</strong>
-            ${dayTasks.length > 0 ? '<div style="margin-top:2px;"><span class="cal-dot"></span></div>' : ''}
-            ${tooltipHTML}
-          </div>
-        `;
+      let map = getClassItemsMap();
+      let items = map[activeClassId] || [];
+      let item = items.find(x => x.id === id);
+      if (item) {
+        item.title = title;
+        item.type = type;
+        item.openDate = openDate;
+        item.dueDate = dueDate;
+        item.desc = desc;
+        saveClassItemsMap(map);
+        closeEditTaskModal();
+        renderClassItems();
+        populateActivitySelector();
+        showNotice("Task successfully updated!");
       }
+    }
+
+    function deleteTask(id) {
+      let map = getClassItemsMap();
+      map[activeClassId] = (map[activeClassId] || []).filter(x => x.id !== id);
+      saveClassItemsMap(map);
+      renderClassItems();
+      populateActivitySelector();
+      renderRosterTable();
+    }
+
+    function populateActivitySelector() {
+      const selector = document.getElementById('rosterActivitySelector');
+      if (!selector) return;
+      let map = getClassItemsMap();
+      let items = map[activeClassId] || [];
+      selector.innerHTML = '';
+      if (items.length === 0) {
+        selector.innerHTML = '<option value="">No activities available</option>';
+        renderRosterTable();
+        return;
+      }
+      items.forEach(item => {
+        selector.innerHTML += `<option value="${item.id}">[${item.type}] ${item.title}</option>`;
+      });
+      renderRosterTable();
+    }
+
+    function renderRosterTable() {
+      const container = document.getElementById('rosterTableContainer');
+      const selector = document.getElementById('rosterActivitySelector');
+      if (!container || !selector) return;
+
+      let map = getClassItemsMap();
+      let items = map[activeClassId] || [];
+      let selectedTaskId = Number(selector.value);
+      
+      let rosterKey = `studySuite_roster_${currentUser.email}_${activeClassId}`;
+      let classRoster = JSON.parse(localStorage.getItem(rosterKey)) || [];
+
+      let subKey = `studySuite_submissions_${currentUser.email}_${activeClassId}`;
+      let allSubmissions = JSON.parse(localStorage.getItem(subKey)) || {};
+
+      let submittedCount = 0;
+      let totalStudents = classRoster.length;
+
+      let studentSubMap = {};
+      if (selectedTaskId) {
+        classRoster.forEach(student => {
+          let studentSubs = allSubmissions[student.email] || [];
+          let foundSub = studentSubs.find(sub => sub.taskId === selectedTaskId);
+          if (foundSub) {
+            studentSubMap[student.email] = foundSub;
+            submittedCount++;
+          }
+        });
+      }
+
+      let percentage = totalStudents > 0 ? Math.round((submittedCount / totalStudents) * 100) : 0;
+
+      document.getElementById('complianceStatsText').innerText = `Compliance Rate: ${percentage}%`;
+      document.getElementById('complianceCountText').innerText = `${submittedCount} / ${totalStudents} Submitted`;
+      document.getElementById('complianceProgressBar').style.width = `${percentage}%`;
+
+      let html = `<table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border); color: var(--text-dim);">
+            <th style="padding: 10px;">Student Name</th>
+            <th style="padding: 10px;">Course & Year</th>
+            <th style="padding: 10px;">Activity Compliance Status</th>
+            <th style="padding: 10px;">Submitted File / Details</th>
+          </tr>
+        </thead>
+        <tbody>`;
+      
+      if (classRoster.length === 0) {
+        html += `<tr><td colspan="4" style="padding: 20px; text-align: center; color: var(--text-dim);">No students have enrolled in this class yet.</td></tr>`;
+      } else {
+        classRoster.forEach(student => {
+          let sub = studentSubMap[student.email];
+          html += `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 12px; font-weight: 600;">${student.name}</td>
+              <td style="padding: 12px; color: var(--text-dim);">${student.course} - ${student.yearLvl}</td>
+              <td style="padding: 12px;">
+                ${sub ? '<span style="color: var(--success); font-weight: bold;">✔ Submitted</span>' : '<span style="color: var(--danger);">Pending</span>'}
+              </td>
+              <td style="padding: 12px;">
+                ${sub ? `<div>📎 <strong>${sub.fileName}</strong></div><div style="font-size: 11px; color: var(--text-dim);">${sub.date}</div>` : '<span style="color: var(--text-dim);">-</span>'}
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+    }
+
+    function executePostBulletin() {
+      const text = document.getElementById('bulletinText').value.trim();
+      if (!text) return;
+      showNotice("Announcement successfully posted!");
+      document.getElementById('bulletinText').value = '';
+    }
+
+    function logout() {
+      confirmAction('Are you sure you want to sign out?', () => {
+        sessionStorage.removeItem('studySuite_session');
+        currentUser = null;
+        switchScreen('greetingScreen');
+      });
     }
   </script>
 </body>
