@@ -9,7 +9,9 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public'))); // O ilagay sa parehong folder ang HTML file
+
+// I-serve ang static files mula sa 'public' folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 1. Database Setup (SQLite)
 const db = new sqlite3.Database('./studysuite.db', (err) => {
@@ -210,7 +212,13 @@ app.delete('/api/activities/:id', (req, res) => {
 });
 
 
+// Fallback route para sa SPA (Single Page Application) kung index.html ang gamit sa public folder
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
 // Simulan ang Server
 app.listen(PORT, () => {
-  console.log(`StudySuite Server is running on http://localhost:${PORT}`);
+  console.log(`StudySuite Server is running on port ${PORT}`);
 });
